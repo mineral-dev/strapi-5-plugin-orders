@@ -16,7 +16,7 @@ const controller = ({ strapi }) => ({
         .service('service')
         .getOrders({ page, status, q });
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   },
   async getOrderById(ctx) {
@@ -29,7 +29,7 @@ const controller = ({ strapi }) => ({
         .service('service')
         .getOrderById(id);
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   }
 });
