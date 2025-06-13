@@ -55,7 +55,7 @@
     "kind": "plugin",
     "name": "strapi-5-plugin-orders",
     "displayName": "Orders",
-    "description": ""
+    "description": "A Strapi plugin for managing orders and transactions"
   },
   "name": "strapi-5-plugin-orders",
   "description": "",
