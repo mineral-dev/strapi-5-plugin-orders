@@ -41,7 +41,7 @@ const index = {
         defaultMessage: "Orders"
       },
       Component: async () => {
-        const { App } = await import("./App-BfTPrNxq.mjs");
+        const { App } = await import("./App-BFcxpira.mjs");
         return App;
       },
       permissions: pluginPermissions.view
