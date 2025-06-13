@@ -31,7 +31,7 @@ const controller = ({ strapi }) => ({
     try {
       ctx.body = await strapi.plugin("strapi-5-plugin-orders").service("service").getOrders({ page, status, q });
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   },
   async getOrderById(ctx) {
@@ -39,7 +39,7 @@ const controller = ({ strapi }) => ({
     try {
       ctx.body = await strapi.plugin("strapi-5-plugin-orders").service("service").getOrderById(id);
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   }
 });

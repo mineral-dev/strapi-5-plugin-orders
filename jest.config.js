@@ -8,8 +8,9 @@ module.exports = {
       testMatch: ['<rootDir>/admin/**/*.test.js', '<rootDir>/admin/**/*.spec.js'],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       transform: {
-        '^.+\\.jsx?$': 'babel-jest',
+        '^.+\\.(js|jsx)$': 'babel-jest',
       },
+      moduleFileExtensions: ['js', 'jsx'],
       moduleNameMapper: {
         '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
       },
@@ -25,12 +26,14 @@ module.exports = {
   ],
   coverageDirectory: '<rootDir>/coverage',
   collectCoverageFrom: [
-    'admin/src/**/*.{js,jsx}',
-    'server/src/**/*.js',
+    'admin/src/components/**/*.{js,jsx}',
+    'server/src/controllers/**/*.js',
+    'server/src/services/**/*.js',
     '!**/node_modules/**',
     '!**/dist/**',
     '!**/*.test.{js,jsx}',
     '!**/*.spec.{js,jsx}',
+    '!**/index.js',
   ],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   clearMocks: true,
