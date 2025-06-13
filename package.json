@@ -53,20 +53,20 @@
   },
   "strapi": {
     "kind": "plugin",
-    "name": "strapi-5-orders",
+    "name": "strapi-5-plugin-orders",
     "displayName": "Orders",
     "description": ""
   },
-  "name": "strapi-5-orders",
+  "name": "strapi-5-plugin-orders",
   "description": "",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/mineral-dev/strapi-5-orders.git"
+    "url": "git+ssh://git@github.com/mineral-dev/strapi-5-plugin-orders.git"
   },
   "bugs": {
-    "url": "https://github.com/mineral-dev/strapi-5-orders/issues"
+    "url": "https://github.com/mineral-dev/strapi-5-plugin-orders/issues"
   },
-  "homepage": "https://github.com/mineral-dev/strapi-5-orders#readme",
+  "homepage": "https://github.com/mineral-dev/strapi-5-plugin-orders#readme",
   "author": "Mineral Studio <zul@mineral.co.id>"
 }
