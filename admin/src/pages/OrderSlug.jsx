@@ -22,7 +22,7 @@ const OrderSlug = () => {
    useEffect(() => {
       if(!id) return;
       const fetchApi = async () => {
-         const response = await fetch(`/api/strapi-5-orders/orders/${id}`);
+         const response = await fetch(`/api/strapi-5-plugin-orders/orders/${id}`);
          const data = await response.json();
          const provinceSplit = data.province.split('||')
          const citySplit = data.city.split('||')

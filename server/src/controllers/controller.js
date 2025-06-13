@@ -1,7 +1,7 @@
 const controller = ({ strapi }) => ({
   index(ctx) {
     ctx.body = strapi
-      .plugin('strapi-5-orders')
+      .plugin('strapi-5-plugin-orders')
       // the name of the service file & the method.
       .service('service')
       .getWelcomeMessage();
@@ -11,12 +11,12 @@ const controller = ({ strapi }) => ({
 
     try {
       ctx.body = await strapi
-        .plugin('strapi-5-orders')
+        .plugin('strapi-5-plugin-orders')
         // the name of the service file & the method.
         .service('service')
         .getOrders({ page, status, q });
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   },
   async getOrderById(ctx) {
@@ -24,12 +24,12 @@ const controller = ({ strapi }) => ({
 
     try {
       ctx.body = await strapi
-        .plugin('strapi-5-orders')
+        .plugin('strapi-5-plugin-orders')
         // the name of the service file & the method.
         .service('service')
         .getOrderById(id);
     } catch (error) {
-      ctx.send({ message: err.message }, 409);
+      ctx.send({ message: error.message }, 409);
     }
   }
 });

@@ -1,22 +1,15 @@
-"use strict";
-Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const jsxRuntime = require("react/jsx-runtime");
-const admin = require("@strapi/strapi/admin");
-const reactRouterDom = require("react-router-dom");
-const designSystem = require("@strapi/design-system");
-const icons = require("@strapi/icons");
-const dayjs = require("dayjs");
-const utc = require("dayjs/plugin/utc");
-const Pagination = require("rc-pagination");
-const react = require("react");
-const reactIntl = require("react-intl");
-const index = require("./index-CCwc03RU.js");
-const currencies = require("currency-formatter");
-const _interopDefault = (e) => e && e.__esModule ? e : { default: e };
-const dayjs__default = /* @__PURE__ */ _interopDefault(dayjs);
-const utc__default = /* @__PURE__ */ _interopDefault(utc);
-const Pagination__default = /* @__PURE__ */ _interopDefault(Pagination);
-const currencies__default = /* @__PURE__ */ _interopDefault(currencies);
+import { jsx, jsxs } from "react/jsx-runtime";
+import { Page } from "@strapi/strapi/admin";
+import { useSearchParams, useNavigate, useParams, Routes, Route } from "react-router-dom";
+import { Badge, Main, Box, Typography, Flex, Searchbar, SingleSelect, SingleSelectOption, Table, Thead, Tr, Th, Tbody, Td, IconButton, PreviousLink, NextLink } from "@strapi/design-system";
+import { Filter, Eye } from "@strapi/icons";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import Pagination from "rc-pagination";
+import { useState, useEffect, useCallback } from "react";
+import { useIntl } from "react-intl";
+import { p as pluginPermissions, P as PLUGIN_ID } from "./index-B9-tR_fJ.mjs";
+import currencies from "currency-formatter";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -2006,12 +1999,12 @@ var parseObject = function(chain, val, options, valuesParsed) {
     } else {
       obj = options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
       var cleanRoot = root.charAt(0) === "[" && root.charAt(root.length - 1) === "]" ? root.slice(1, -1) : root;
-      var index2 = parseInt(cleanRoot, 10);
+      var index = parseInt(cleanRoot, 10);
       if (!options.parseArrays && cleanRoot === "") {
         obj = { 0: leaf };
-      } else if (!isNaN(index2) && root !== cleanRoot && String(index2) === cleanRoot && index2 >= 0 && (options.parseArrays && index2 <= options.arrayLimit)) {
+      } else if (!isNaN(index) && root !== cleanRoot && String(index) === cleanRoot && index >= 0 && (options.parseArrays && index <= options.arrayLimit)) {
         obj = [];
-        obj[index2] = leaf;
+        obj[index] = leaf;
       } else if (cleanRoot !== "__proto__") {
         obj[cleanRoot] = leaf;
       }
@@ -2112,11 +2105,11 @@ var lib = {
 };
 const qs = /* @__PURE__ */ getDefaultExportFromCjs(lib);
 const Status = ({ data }) => {
-  const [status, setStatus] = react.useState({
+  const [status, setStatus] = useState({
     name: "",
     variant: "success-light"
   });
-  react.useEffect(() => {
+  useEffect(() => {
     const statusMap = {
       0: "Pending Payment",
       1: "Paid",
@@ -2134,10 +2127,10 @@ const Status = ({ data }) => {
       });
     }
   }, [data]);
-  return /* @__PURE__ */ jsxRuntime.jsx(designSystem.Badge, { children: status.name });
+  return /* @__PURE__ */ jsx(Badge, { children: status.name });
 };
 const money = (data = 0) => {
-  return currencies__default.default.format(data, {
+  return currencies.format(data, {
     code: "IDR",
     symbol: "IDR",
     // @ts-ignore
@@ -2149,14 +2142,14 @@ const money = (data = 0) => {
     format: "%s %v"
   });
 };
-dayjs__default.default.extend(utc__default.default);
+dayjs.extend(utc);
 const HomePage = () => {
-  const [searchParams] = reactRouterDom.useSearchParams();
-  const [hasPermission, setHasPermission] = react.useState(false);
-  const { formatMessage } = reactIntl.useIntl();
-  const [orders, setOrders] = react.useState([]);
-  const [pagination, setPagination] = react.useState([]);
-  const navigate = reactRouterDom.useNavigate();
+  const [searchParams] = useSearchParams();
+  const [hasPermission, setHasPermission] = useState(false);
+  const { formatMessage } = useIntl();
+  const [orders, setOrders] = useState([]);
+  const [pagination, setPagination] = useState([]);
+  const navigate = useNavigate();
   const page = searchParams.get("page");
   const status = searchParams.get("status");
   const q = searchParams.get("q");
@@ -2170,7 +2163,7 @@ const HomePage = () => {
       arrayFormat: "repeat"
     });
     const response = await fetch(
-      `/api/strapi-5-orders/orders?${dataParams}`
+      `/api/strapi-5-plugin-orders/orders?${dataParams}`
     );
     const dataJson = await response.json();
     if (dataJson?.data) {
@@ -2180,14 +2173,14 @@ const HomePage = () => {
       setPagination(dataJson.pagination);
     }
   };
-  react.useEffect(() => {
+  useEffect(() => {
     if (!searchParams.get("page")) {
       const newParams = new URLSearchParams(searchParams);
       newParams.set("page", "0");
       navigate({ search: `?${newParams.toString()}` }, { replace: true });
     }
   }, [searchParams, navigate]);
-  react.useEffect(() => {
+  useEffect(() => {
     if (page !== null) {
       fetchApi();
     }
@@ -2219,20 +2212,20 @@ const HomePage = () => {
   };
   const divItemRender = (current, type2, element) => {
     if (type2 === "prev") {
-      return /* @__PURE__ */ jsxRuntime.jsx(designSystem.PreviousLink, {});
+      return /* @__PURE__ */ jsx(PreviousLink, {});
     }
     if (type2 === "next") {
-      return /* @__PURE__ */ jsxRuntime.jsx(designSystem.NextLink, {});
+      return /* @__PURE__ */ jsx(NextLink, {});
     }
     if (type2 === "page") {
-      return /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: current });
+      return /* @__PURE__ */ jsx(Typography, { children: current });
     }
     return element;
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(admin.Page.Protect, { permissions: index.pluginPermissions.view, children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Main, { children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Box, { style: { marginTop: 24, marginLeft: 16, marginRight: 16 }, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "alpha", as: "h2", children: "Orders" }),
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      designSystem.Flex,
+  return /* @__PURE__ */ jsx(Page.Protect, { permissions: pluginPermissions.view, children: /* @__PURE__ */ jsx(Main, { children: /* @__PURE__ */ jsxs(Box, { style: { marginTop: 24, marginLeft: 16, marginRight: 16 }, children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "alpha", as: "h2", children: "Orders" }),
+    /* @__PURE__ */ jsxs(
+      Flex,
       {
         style: {
           width: 350,
@@ -2242,8 +2235,8 @@ const HomePage = () => {
           position: "relative"
         },
         children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            designSystem.Searchbar,
+          /* @__PURE__ */ jsx(
+            Searchbar,
             {
               name: "searchbar",
               onChange: (e) => handleSearch(e.target.value),
@@ -2252,24 +2245,24 @@ const HomePage = () => {
               onClear: () => handleSearch("")
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: { gap: 12 }, children: [
-            /* @__PURE__ */ jsxRuntime.jsx(icons.Filter, {}),
-            /* @__PURE__ */ jsxRuntime.jsxs(
-              designSystem.SingleSelect,
+          /* @__PURE__ */ jsxs(Flex, { style: { gap: 12 }, children: [
+            /* @__PURE__ */ jsx(Filter, {}),
+            /* @__PURE__ */ jsxs(
+              SingleSelect,
               {
                 style: { width: "100%" },
                 value: status || "all",
                 onChange: handleStatusChange,
                 placeholder: "Filter by status",
                 children: [
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "all", children: "All" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "0", children: "Pending Payment" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "1", children: "Paid" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "2", children: "Shipped" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "3", children: "Canceled" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "4", children: "Expired" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "5", children: "Canceled by Admin" }),
-                  /* @__PURE__ */ jsxRuntime.jsx(designSystem.SingleSelectOption, { value: "999", children: "Need Verification" })
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "all", children: "All" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "0", children: "Pending Payment" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "1", children: "Paid" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "2", children: "Shipped" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "3", children: "Canceled" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "4", children: "Expired" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "5", children: "Canceled by Admin" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "999", children: "Need Verification" })
                 ]
               }
             )
@@ -2277,41 +2270,41 @@ const HomePage = () => {
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Table, { colCount: 20, rowCount: 9, footer: void 0, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Thead, { children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Tr, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "No" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Date" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Order Id" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Name" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Email" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Courier" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Airwaybill" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Total" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Status" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Th, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { variant: "sigma", children: "Actions" }) })
+    /* @__PURE__ */ jsxs(Table, { colCount: 20, rowCount: 9, footer: void 0, children: [
+      /* @__PURE__ */ jsx(Thead, { children: /* @__PURE__ */ jsxs(Tr, { children: [
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "No" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Date" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Order Id" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Name" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Email" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Courier" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Airwaybill" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Total" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Status" }) }),
+        /* @__PURE__ */ jsx(Th, { children: /* @__PURE__ */ jsx(Typography, { variant: "sigma", children: "Actions" }) })
       ] }) }),
-      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Tbody, { children: orders && orders.length > 0 && orders.map((item, key) => /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Tr, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item.id }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: dayjs__default.default(item.createdAt).format("DD/MM/YYYY HH:mm") }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item.order_id }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item.name }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item.email }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { style: { textTransform: "uppercase" }, children: item.shipping_service }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item?.airwaybill_no ?? "-" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(item.grand_total) }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: /* @__PURE__ */ jsxRuntime.jsx(Status, { data: item.status }) }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { style: { display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.IconButton, { onClick: () => navigate(`/plugins/${index.PLUGIN_ID}/${item.documentId}`), label: "Edit", noBorder: true, children: /* @__PURE__ */ jsxRuntime.jsx(icons.Eye, {}) }) })
+      /* @__PURE__ */ jsx(Tbody, { children: orders && orders.length > 0 && orders.map((item, key) => /* @__PURE__ */ jsxs(Tr, { children: [
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.id }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: dayjs(item.createdAt).format("DD/MM/YYYY HH:mm") }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.order_id }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.name }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.email }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { style: { textTransform: "uppercase" }, children: item.shipping_service }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item?.airwaybill_no ?? "-" }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: money(item.grand_total) }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: /* @__PURE__ */ jsx(Status, { data: item.status }) }) }),
+        /* @__PURE__ */ jsx(Td, { style: { display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ jsx(IconButton, { onClick: () => navigate(`/plugins/${PLUGIN_ID}/${item.documentId}`), label: "Edit", noBorder: true, children: /* @__PURE__ */ jsx(Eye, {}) }) })
       ] }, key)) })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      designSystem.Flex,
+    /* @__PURE__ */ jsx(
+      Flex,
       {
         style: {
           justifyContent: "flex-end",
           marginTop: 18
         },
-        children: /* @__PURE__ */ jsxRuntime.jsx(
-          Pagination__default.default,
+        children: /* @__PURE__ */ jsx(
+          Pagination,
           {
             onChange: handlePaginate,
             current: pagination?.page ? pagination?.page : 1,
@@ -2337,8 +2330,8 @@ function OrderItem({ data, style }) {
   if (data?.sale_price) {
     subtotal = data.sale_price * data.qty;
   }
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    designSystem.Flex,
+  return /* @__PURE__ */ jsxs(
+    Flex,
     {
       style: {
         ...style,
@@ -2350,8 +2343,8 @@ function OrderItem({ data, style }) {
         width: "100%"
       },
       children: [
-        /* @__PURE__ */ jsxRuntime.jsxs(
-          designSystem.Box,
+        /* @__PURE__ */ jsxs(
+          Box,
           {
             style: {
               display: "flex",
@@ -2359,9 +2352,9 @@ function OrderItem({ data, style }) {
               flex: "1 1 0"
             },
             children: [
-              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { as: "h6", children: data.name }),
-              data.options && data.options.length > 0 && data.options.map((item, i) => /* @__PURE__ */ jsxRuntime.jsxs(
-                designSystem.Typography,
+              /* @__PURE__ */ jsx(Typography, { as: "h6", children: data.name }),
+              data.options && data.options.length > 0 && data.options.map((item, i) => /* @__PURE__ */ jsxs(
+                Typography,
                 {
                   style: {
                     textTransform: "capitalize"
@@ -2374,57 +2367,57 @@ function OrderItem({ data, style }) {
                 },
                 i
               )),
-              /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { children: [
+              /* @__PURE__ */ jsxs(Typography, { children: [
                 "SKU : ",
                 data.sku
               ] })
             ]
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsxs(
-          designSystem.Box,
+        /* @__PURE__ */ jsxs(
+          Box,
           {
             style: {
               flex: "1 1 0",
               minWidth: "25%"
             },
             children: [
-              /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { children: [
+              /* @__PURE__ */ jsxs(Typography, { children: [
                 money(data.regular_price),
                 " "
               ] }),
-              data.sale_price && data.regular_price != data?.sale_price && /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { children: [
+              data.sale_price && data.regular_price != data?.sale_price && /* @__PURE__ */ jsxs(Typography, { children: [
                 "- (",
                 money(data.sale_price),
                 ")"
               ] }),
-              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: " x " }),
-              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: data.qty })
+              /* @__PURE__ */ jsx(Typography, { children: " x " }),
+              /* @__PURE__ */ jsx(Typography, { children: data.qty })
             ]
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          designSystem.Box,
+        /* @__PURE__ */ jsx(
+          Box,
           {
             style: {
               paddingLeft: 10,
               paddingRight: 10
             },
-            children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal) })
+            children: /* @__PURE__ */ jsx(Typography, { children: money(subtotal) })
           }
         )
       ]
     }
   );
 }
-dayjs__default.default.extend(utc__default.default);
+dayjs.extend(utc);
 const OrderSlug = () => {
-  const { id } = reactRouterDom.useParams();
-  const [order, setOrder] = react.useState(initType);
-  react.useEffect(() => {
+  const { id } = useParams();
+  const [order, setOrder] = useState(initType);
+  useEffect(() => {
     if (!id) return;
     const fetchApi = async () => {
-      const response = await fetch(`/api/strapi-5-orders/orders/${id}`);
+      const response = await fetch(`/api/strapi-5-plugin-orders/orders/${id}`);
       const data = await response.json();
       const provinceSplit = data.province.split("||");
       const citySplit = data.city.split("||");
@@ -2438,7 +2431,7 @@ const OrderSlug = () => {
     };
     fetchApi();
   }, [id]);
-  const subtotal = react.useCallback(() => {
+  const subtotal = useCallback(() => {
     let count = 0;
     if (order?.order_item?.length > 0) {
       count = order?.order_item?.reduce((acc, prev) => {
@@ -2447,7 +2440,7 @@ const OrderSlug = () => {
     }
     return count;
   }, [order]);
-  const subQty = react.useCallback(() => {
+  const subQty = useCallback(() => {
     let count = 0;
     if (order?.order_item?.length > 0) {
       count = order?.order_item.reduce((acc, prev) => {
@@ -2456,32 +2449,32 @@ const OrderSlug = () => {
     }
     return count;
   }, [order]);
-  return /* @__PURE__ */ jsxRuntime.jsx(admin.Page.Protect, { permissions: index.pluginPermissions.view, children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Main, { children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Box, { padding: 8, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: { gap: "1rem" }, direction: "column", alignItems: "flex-start", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { variant: "alpha", as: "h2", children: [
+  return /* @__PURE__ */ jsx(Page.Protect, { permissions: pluginPermissions.view, children: /* @__PURE__ */ jsx(Main, { children: /* @__PURE__ */ jsxs(Box, { padding: 8, children: [
+    /* @__PURE__ */ jsxs(Flex, { style: { gap: "1rem" }, direction: "column", alignItems: "flex-start", children: [
+      /* @__PURE__ */ jsxs(Typography, { variant: "alpha", as: "h2", children: [
         "# ",
         order.order_id
       ] }),
-      order.createdAt && /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { as: "h6", children: dayjs__default.default(order.createdAt).utc().format("DD/MM/YYYY HH:mm") })
+      order.createdAt && /* @__PURE__ */ jsx(Typography, { as: "h6", children: dayjs(order.createdAt).utc().format("DD/MM/YYYY HH:mm") })
     ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      designSystem.Flex,
+    /* @__PURE__ */ jsxs(
+      Flex,
       {
         style: {
           width: "66%"
         },
         direction: "column",
         children: [
-          /* @__PURE__ */ jsxRuntime.jsxs(
-            designSystem.Flex,
+          /* @__PURE__ */ jsxs(
+            Flex,
             {
               style: {
                 width: "100%"
               },
               direction: "column",
               children: [
-                /* @__PURE__ */ jsxRuntime.jsx(
-                  designSystem.Box,
+                /* @__PURE__ */ jsx(
+                  Box,
                   {
                     background: "neutral0",
                     style: {
@@ -2490,11 +2483,11 @@ const OrderSlug = () => {
                       borderTopRightRadius: 6,
                       padding: 16
                     },
-                    children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { as: "h5", children: "Order Item" })
+                    children: /* @__PURE__ */ jsx(Typography, { as: "h5", children: "Order Item" })
                   }
                 ),
-                /* @__PURE__ */ jsxRuntime.jsx(
-                  designSystem.Flex,
+                /* @__PURE__ */ jsx(
+                  Flex,
                   {
                     style: {
                       flexDirection: "column",
@@ -2505,7 +2498,7 @@ const OrderSlug = () => {
                       borderStyle: "solid",
                       width: "100%"
                     },
-                    children: order.order_item && order.order_item.length > 0 && order.order_item.map((item, i) => /* @__PURE__ */ jsxRuntime.jsx(
+                    children: order.order_item && order.order_item.length > 0 && order.order_item.map((item, i) => /* @__PURE__ */ jsx(
                       OrderItem,
                       {
                         data: item,
@@ -2522,38 +2515,38 @@ const OrderSlug = () => {
               ]
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            designSystem.Flex,
+          /* @__PURE__ */ jsx(
+            Flex,
             {
               style: {
                 marginTop: 24,
                 width: "100%",
                 flexDirection: "column"
               },
-              children: /* @__PURE__ */ jsxRuntime.jsxs(
-                designSystem.Box,
+              children: /* @__PURE__ */ jsxs(
+                Box,
                 {
                   style: {
                     width: "100%"
                   },
                   background: "neutral0",
                   children: [
-                    /* @__PURE__ */ jsxRuntime.jsx(
-                      designSystem.Box,
+                    /* @__PURE__ */ jsx(
+                      Box,
                       {
                         style: { padding: 16 },
-                        children: /* @__PURE__ */ jsxRuntime.jsx(Status, { data: order?.status })
+                        children: /* @__PURE__ */ jsx(Status, { data: order?.status })
                       }
                     ),
-                    /* @__PURE__ */ jsxRuntime.jsxs(
-                      designSystem.Flex,
+                    /* @__PURE__ */ jsxs(
+                      Flex,
                       {
                         style: {
                           flexDirection: "column",
                           marginBottom: 16
                         },
                         children: [
-                          /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                          /* @__PURE__ */ jsxs(Flex, { style: {
                             width: "100%",
                             justifyContent: "space-between",
                             paddingLeft: 16,
@@ -2561,8 +2554,8 @@ const OrderSlug = () => {
                             paddingBottom: 8,
                             borderBottom: "1px solid #181826"
                           }, children: [
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Subtotal" }),
-                            /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { style: {
+                            /* @__PURE__ */ jsx(Typography, { children: "Subtotal" }),
+                            /* @__PURE__ */ jsxs(Typography, { style: {
                               flex: "1 1 0",
                               paddingLeft: 16,
                               paddingRight: 16
@@ -2570,9 +2563,9 @@ const OrderSlug = () => {
                               subQty(),
                               " item"
                             ] }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal()) })
+                            /* @__PURE__ */ jsx(Typography, { children: money(subtotal()) })
                           ] }),
-                          /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                          /* @__PURE__ */ jsxs(Flex, { style: {
                             width: "100%",
                             justifyContent: "space-between",
                             paddingTop: 8,
@@ -2581,8 +2574,8 @@ const OrderSlug = () => {
                             paddingRight: 16,
                             borderBottom: "1px solid #181826"
                           }, children: [
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Shipping" }),
-                            /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { style: {
+                            /* @__PURE__ */ jsx(Typography, { children: "Shipping" }),
+                            /* @__PURE__ */ jsxs(Typography, { style: {
                               flex: "1 1 0",
                               paddingLeft: 16,
                               paddingRight: 16
@@ -2591,17 +2584,17 @@ const OrderSlug = () => {
                               " Kg ~ ",
                               order.shipping_service
                             ] }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.shipping_cost) })
+                            /* @__PURE__ */ jsx(Typography, { children: money(order?.shipping_cost) })
                           ] }),
-                          /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                          /* @__PURE__ */ jsxs(Flex, { style: {
                             width: "100%",
                             justifyContent: "space-between",
                             paddingTop: 8,
                             paddingLeft: 16,
                             paddingRight: 16
                           }, children: [
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Total" }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.grand_total) })
+                            /* @__PURE__ */ jsx(Typography, { children: "Total" }),
+                            /* @__PURE__ */ jsx(Typography, { children: money(order?.grand_total) })
                           ] })
                         ]
                       }
@@ -2611,38 +2604,38 @@ const OrderSlug = () => {
               )
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            designSystem.Flex,
+          /* @__PURE__ */ jsx(
+            Flex,
             {
               style: {
                 marginTop: 24,
                 width: "100%",
                 flexDirection: "column"
               },
-              children: /* @__PURE__ */ jsxRuntime.jsxs(
-                designSystem.Box,
+              children: /* @__PURE__ */ jsxs(
+                Box,
                 {
                   style: {
                     width: "100%"
                   },
                   background: "neutral0",
                   children: [
-                    /* @__PURE__ */ jsxRuntime.jsx(
-                      designSystem.Box,
+                    /* @__PURE__ */ jsx(
+                      Box,
                       {
                         style: { padding: 16 },
-                        children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { as: "h6", children: "Shipping Information" })
+                        children: /* @__PURE__ */ jsx(Typography, { as: "h6", children: "Shipping Information" })
                       }
                     ),
-                    /* @__PURE__ */ jsxRuntime.jsx(
-                      designSystem.Flex,
+                    /* @__PURE__ */ jsx(
+                      Flex,
                       {
                         style: {
                           flexDirection: "column",
                           marginBottom: 16
                         },
                         background: "neutral0",
-                        children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                        children: /* @__PURE__ */ jsxs(Flex, { style: {
                           width: "100%",
                           justifyContent: "space-between",
                           paddingLeft: 16,
@@ -2651,8 +2644,8 @@ const OrderSlug = () => {
                           flexDirection: "column",
                           alignItems: "flex-start"
                         }, children: [
-                          /* @__PURE__ */ jsxRuntime.jsx(
-                            designSystem.Typography,
+                          /* @__PURE__ */ jsx(
+                            Typography,
                             {
                               as: "h6",
                               style: {
@@ -2661,8 +2654,8 @@ const OrderSlug = () => {
                               children: order?.name
                             }
                           ),
-                          /* @__PURE__ */ jsxRuntime.jsx(
-                            designSystem.Typography,
+                          /* @__PURE__ */ jsx(
+                            Typography,
                             {
                               as: "h6",
                               style: {
@@ -2671,8 +2664,8 @@ const OrderSlug = () => {
                               children: order.address
                             }
                           ),
-                          /* @__PURE__ */ jsxRuntime.jsxs(
-                            designSystem.Typography,
+                          /* @__PURE__ */ jsxs(
+                            Typography,
                             {
                               as: "h6",
                               style: {
@@ -2700,41 +2693,41 @@ const OrderSlug = () => {
               )
             }
           ),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            designSystem.Flex,
+          /* @__PURE__ */ jsx(
+            Flex,
             {
               style: {
                 marginTop: 24,
                 width: "100%",
                 flexDirection: "column"
               },
-              children: /* @__PURE__ */ jsxRuntime.jsxs(
-                designSystem.Box,
+              children: /* @__PURE__ */ jsxs(
+                Box,
                 {
                   style: {
                     width: "100%"
                   },
                   background: "neutral0",
                   children: [
-                    /* @__PURE__ */ jsxRuntime.jsx(
-                      designSystem.Box,
+                    /* @__PURE__ */ jsx(
+                      Box,
                       {
                         style: { padding: 16 },
-                        children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { as: "h6", children: [
+                        children: /* @__PURE__ */ jsxs(Typography, { as: "h6", children: [
                           "Airwaybill ",
                           order.shipping_service
                         ] })
                       }
                     ),
-                    /* @__PURE__ */ jsxRuntime.jsx(
-                      designSystem.Flex,
+                    /* @__PURE__ */ jsx(
+                      Flex,
                       {
                         style: {
                           flexDirection: "column",
                           marginBottom: 16
                         },
                         background: "neutral0",
-                        children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Flex, { style: {
+                        children: /* @__PURE__ */ jsx(Flex, { style: {
                           width: "100%",
                           justifyContent: "space-between",
                           paddingLeft: 16,
@@ -2742,8 +2735,8 @@ const OrderSlug = () => {
                           paddingBottom: 8,
                           flexDirection: "column",
                           alignItems: "flex-start"
-                        }, children: /* @__PURE__ */ jsxRuntime.jsx(
-                          designSystem.Typography,
+                        }, children: /* @__PURE__ */ jsx(
+                          Typography,
                           {
                             as: "h6",
                             style: {
@@ -2846,10 +2839,12 @@ const initType = {
   }
 };
 const App = () => {
-  return /* @__PURE__ */ jsxRuntime.jsxs(reactRouterDom.Routes, { children: [
-    /* @__PURE__ */ jsxRuntime.jsx(reactRouterDom.Route, { index: true, element: /* @__PURE__ */ jsxRuntime.jsx(HomePage, {}) }),
-    /* @__PURE__ */ jsxRuntime.jsx(reactRouterDom.Route, { path: ":id", element: /* @__PURE__ */ jsxRuntime.jsx(OrderSlug, {}) }),
-    /* @__PURE__ */ jsxRuntime.jsx(reactRouterDom.Route, { path: "*", element: /* @__PURE__ */ jsxRuntime.jsx(admin.Page.Error, {}) })
+  return /* @__PURE__ */ jsxs(Routes, { children: [
+    /* @__PURE__ */ jsx(Route, { index: true, element: /* @__PURE__ */ jsx(HomePage, {}) }),
+    /* @__PURE__ */ jsx(Route, { path: ":id", element: /* @__PURE__ */ jsx(OrderSlug, {}) }),
+    /* @__PURE__ */ jsx(Route, { path: "*", element: /* @__PURE__ */ jsx(Page.Error, {}) })
   ] });
 };
-exports.App = App;
+export {
+  App
+};
