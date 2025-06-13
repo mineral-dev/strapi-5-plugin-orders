@@ -1,4 +1,4 @@
-name: Tests
+name: Tests and Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
+  test-and-build:
     runs-on: ubuntu-latest
     
     strategy:
@@ -40,5 +40,21 @@ jobs:
         flags: unittests
         name: codecov-umbrella
     
-    - name: Run build test
-      run: npm run build:test
+    - name: Build plugin (includes tests)
+      run: npm run build
+    
+    - name: Verify build artifacts
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "Build failed: dist directory not found"
+          exit 1
+        fi
+        if [ ! -f "dist/admin/index.js" ]; then
+          echo "Build failed: admin bundle not found"
+          exit 1
+        fi
+        if [ ! -f "dist/server/index.js" ]; then
+          echo "Build failed: server bundle not found"
+          exit 1
+        fi
+        echo "Build artifacts verified successfully!"
