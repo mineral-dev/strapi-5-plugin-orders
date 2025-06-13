@@ -1,1 +1,1 @@
-# strapi-5-orders
+# strapi-5-plugin-orders

@@ -1,5 +1,5 @@
 "use strict";
-const React = require("react");
+const react = require("react");
 const jsxRuntime = require("react/jsx-runtime");
 const icons = require("@strapi/icons");
 const __variableDynamicImportRuntimeHelper = (glob, path, segs) => {
@@ -18,10 +18,10 @@ const __variableDynamicImportRuntimeHelper = (glob, path, segs) => {
     );
   });
 };
-const PLUGIN_ID = "strapi-5-orders";
+const PLUGIN_ID = "strapi-5-plugin-orders";
 const Initializer = ({ setPlugin }) => {
-  const ref = React.useRef(setPlugin);
-  React.useEffect(() => {
+  const ref = react.useRef(setPlugin);
+  react.useEffect(() => {
     ref.current(PLUGIN_ID);
   }, []);
   return null;
@@ -29,7 +29,7 @@ const Initializer = ({ setPlugin }) => {
 const PluginIcon = () => /* @__PURE__ */ jsxRuntime.jsx(icons.Sparkle, {});
 const pluginPermissions = {
   view: [
-    { action: "plugin::strapi-5-orders.access", subject: null }
+    { action: "plugin::strapi-5-plugin-orders.access", subject: null }
   ]
 };
 const index = {
@@ -42,7 +42,7 @@ const index = {
         defaultMessage: "Orders"
       },
       Component: async () => {
-        const { App } = await Promise.resolve().then(() => require("./App-UdxNDjYL.js"));
+        const { App } = await Promise.resolve().then(() => require("./App-CcKDc13a.js"));
         return App;
       },
       permissions: pluginPermissions.view

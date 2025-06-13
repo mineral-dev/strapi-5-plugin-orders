@@ -4,7 +4,7 @@ const bootstrap = async ({ strapi }) => {
       section: 'plugins',
       displayName: 'Show Order',
       uid: 'access',  // Action to access the plugin
-      pluginName: 'strapi-5-orders',  // Plugin name
+      pluginName: 'strapi-5-plugin-orders',  // Plugin name
     },
   ];
 

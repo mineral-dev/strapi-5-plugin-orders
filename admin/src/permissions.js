@@ -1,6 +1,6 @@
 const pluginPermissions = {
    view: [
-      { action: 'plugin::strapi-5-orders.access', subject: null },
+      { action: 'plugin::strapi-5-plugin-orders.access', subject: null },
    ],
 };
 

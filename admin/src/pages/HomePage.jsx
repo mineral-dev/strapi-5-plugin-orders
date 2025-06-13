@@ -57,7 +57,7 @@ const HomePage = () => {
     });
 
     const response = await fetch(
-      `/api/strapi-5-orders/orders?${dataParams}`,
+      `/api/strapi-5-plugin-orders/orders?${dataParams}`,
     );
     const dataJson = await response.json();
 

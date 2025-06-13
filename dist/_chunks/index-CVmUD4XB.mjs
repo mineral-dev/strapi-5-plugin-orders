@@ -17,7 +17,7 @@ const __variableDynamicImportRuntimeHelper = (glob, path, segs) => {
     );
   });
 };
-const PLUGIN_ID = "strapi-5-orders";
+const PLUGIN_ID = "strapi-5-plugin-orders";
 const Initializer = ({ setPlugin }) => {
   const ref = useRef(setPlugin);
   useEffect(() => {
@@ -28,7 +28,7 @@ const Initializer = ({ setPlugin }) => {
 const PluginIcon = () => /* @__PURE__ */ jsx(Sparkle, {});
 const pluginPermissions = {
   view: [
-    { action: "plugin::strapi-5-orders.access", subject: null }
+    { action: "plugin::strapi-5-plugin-orders.access", subject: null }
   ]
 };
 const index = {
@@ -41,7 +41,7 @@ const index = {
         defaultMessage: "Orders"
       },
       Component: async () => {
-        const { App } = await import("./App-B_qLje5_.mjs");
+        const { App } = await import("./App-BFcxpira.mjs");
         return App;
       },
       permissions: pluginPermissions.view
