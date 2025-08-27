@@ -42,7 +42,7 @@ const index = {
         defaultMessage: "Orders"
       },
       Component: async () => {
-        const { App } = await Promise.resolve().then(() => require("./App-CsQqdMzA.js"));
+        const { App } = await Promise.resolve().then(() => require("./App-Dn3kTtGk.js"));
         return App;
       },
       permissions: pluginPermissions.view

@@ -26,7 +26,7 @@ const service = ({ strapi }) => ({
           ],
           $and: [
             {
-              status: { $containsi: status ?? "" }
+              order_status: { $containsi: status ?? "" }
             }
           ]
         },

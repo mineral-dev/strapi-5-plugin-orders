@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import { jsx } from "react/jsx-runtime";
-import { Sparkle } from "@strapi/icons";
+import { Store } from "@strapi/icons";
 const __variableDynamicImportRuntimeHelper = (glob, path, segs) => {
   const v = glob[path];
   if (v) {
@@ -25,7 +25,7 @@ const Initializer = ({ setPlugin }) => {
   }, []);
   return null;
 };
-const PluginIcon = () => /* @__PURE__ */ jsx(Sparkle, {});
+const PluginIcon = () => /* @__PURE__ */ jsx(Store, {});
 const pluginPermissions = {
   view: [
     { action: "plugin::strapi-5-plugin-orders.access", subject: null }
@@ -41,7 +41,7 @@ const index = {
         defaultMessage: "Orders"
       },
       Component: async () => {
-        const { App } = await import("./App-BFcxpira.mjs");
+        const { App } = await import("./App-DJ6y9Qs-.mjs");
         return App;
       },
       permissions: pluginPermissions.view
@@ -71,3 +71,4 @@ export {
   index as i,
   pluginPermissions as p
 };
+//# sourceMappingURL=index-fmb0QwAR.mjs.map

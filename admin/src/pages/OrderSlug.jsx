@@ -136,7 +136,7 @@ const OrderSlug = () => {
                         <Box
                            style={{ padding: 16, }}
                         >
-                           <Status data={order?.status} />
+                           <Status data={order?.order_status} />
                         </Box>
                         <Flex
                            style={{
@@ -313,7 +313,7 @@ const initType = {
    subdistrict: null,
    orderal_code: null,
    mobile: null,
-   status: 0,
+   order_status: 0,
    total: null,
    discount: null,
    shipping_service: null,

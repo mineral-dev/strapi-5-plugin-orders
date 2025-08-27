@@ -112,7 +112,7 @@ const service = ({ strapi }) => ({
           ],
           $and: [
             {
-              status: { $containsi: status ?? "" }
+              order_status: { $containsi: status ?? "" }
             }
           ]
         },
@@ -166,3 +166,4 @@ const index = {
   services
 };
 module.exports = index;
+//# sourceMappingURL=index.js.map

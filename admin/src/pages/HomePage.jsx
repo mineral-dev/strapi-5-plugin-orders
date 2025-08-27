@@ -239,7 +239,7 @@ const HomePage = () => {
                       <Typography>{money(item.grand_total)}</Typography>
                     </Td>
                     <Td>
-                      <Typography>{<Status data={item.status} />}</Typography>
+                      <Typography>{<Status data={item.order_status} />}</Typography>
                     </Td>
                     <Td style={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                       <IconButton onClick={()=> navigate(`/plugins/${PLUGIN_ID}/${item.documentId}`)} label="Edit" noBorder>
