@@ -24,14 +24,15 @@ const OrderSlug = () => {
       const fetchApi = async () => {
          const response = await fetch(`/api/strapi-5-plugin-orders/orders/${id}`);
          const data = await response.json();
-         const provinceSplit = data.province.split('||')
-         const citySplit = data.city.split('||')
-         const districtSplit = data.district.split('||')
-         const subdistrictSplit = data.subdistrict.split('||')
+         const provinceSplit = data?.province?.split('||')
+         const citySplit = data?.city?.split('||')
+         const districtSplit = data?.district?.split('||')
+         const subdistrictSplit = data?.subdistrict?.split('||')
+
          data.province = provinceSplit.length > 0 ? provinceSplit[0] : province.city
          data.city = citySplit.length > 0 ? citySplit[1] : data.city
          data.district = districtSplit.length > 0 ? districtSplit[1] : data.district
-         data.subdistrict = subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict
+         data.subdistrict = subdistrictSplit && subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict
          setOrder(data);
       };
       fetchApi();
@@ -241,7 +242,7 @@ const OrderSlug = () => {
                                  style={{
                                     textTransform: 'uppercase'
                                  }}
-                              >, {order.subdistrict}, {order.district}, {order.city}, {order.province} - {order.country}</Typography>
+                              >{order.subdistrict && `${order.subdistrict}, `}{order.district && `${order.district}, `}{order.city && `${order.city}, `} {order.province} - {order.country}</Typography>
                            </Flex>
                         </Flex>
                      </Box>

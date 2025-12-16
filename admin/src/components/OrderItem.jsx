@@ -49,7 +49,7 @@ export default function OrderItem({ data, style}) {
          >
             <Typography>{ money(data.regular_price) } </Typography>
             {
-               (data.sale_price && (data.regular_price != data?.sale_price)) &&
+               (data.sale_price > 0 && data?.sale_price < data.regular_price) &&
                <Typography>- ({ money(data.sale_price) })</Typography>
             }
             <Typography> x </Typography>
