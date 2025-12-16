@@ -29,9 +29,9 @@ const OrderSlug = () => {
          const districtSplit = data?.district?.split('||')
          const subdistrictSplit = data?.subdistrict?.split('||')
 
-         data.province = provinceSplit.length > 0 ? provinceSplit[0] : province.city
-         data.city = citySplit.length > 0 ? citySplit[1] : data.city
-         data.district = districtSplit.length > 0 ? districtSplit[1] : data.district
+         data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : province.city
+         data.city = citySplit && citySplit.length > 0 ? citySplit[1] : data.city
+         data.district = districtSplit && districtSplit.length > 0 ? districtSplit[1] : data.district
          data.subdistrict = subdistrictSplit && subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict
          setOrder(data);
       };
@@ -178,6 +178,21 @@ const OrderSlug = () => {
                               }}>{order?.shipping_total_weight_ori} Kg ~ {order.shipping_service}</Typography>
                               <Typography>{money(order?.shipping_cost)}</Typography>
                            </Flex>
+                           {
+                              order?.admin_fee > 0 &&
+                              <Flex style={{
+                                 width: '100%',
+                                 justifyContent: 'space-between',
+                                 paddingTop: 8,
+                                 paddingBottom: 8,
+                                 paddingLeft: 16,
+                                 paddingRight: 16,
+                                 borderBottom: '1px solid #181826'
+                              }}>
+                                 <Typography>Admin Fee</Typography>
+                                 <Typography>{money(order?.admin_fee)}</Typography>
+                              </Flex>
+                           }
                            <Flex style={{
                               width: '100%',
                               justifyContent: 'space-between',
