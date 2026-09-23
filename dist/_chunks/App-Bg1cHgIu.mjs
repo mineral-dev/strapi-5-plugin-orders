@@ -8,7 +8,7 @@ import utc from "dayjs/plugin/utc";
 import Pagination from "rc-pagination";
 import { useState, useEffect, useCallback } from "react";
 import { useIntl } from "react-intl";
-import { p as pluginPermissions, P as PLUGIN_ID } from "./index-C96_GN96.mjs";
+import { p as pluginPermissions, P as PLUGIN_ID } from "./index-B4RyBB5q.mjs";
 import currencies from "currency-formatter";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
@@ -1459,8 +1459,23 @@ var formats$3 = {
   RFC3986: Format.RFC3986
 };
 var formats$2 = formats$3;
+var getSideChannel$1 = sideChannel;
 var has$2 = Object.prototype.hasOwnProperty;
 var isArray$2 = Array.isArray;
+var overflowChannel = getSideChannel$1();
+var markOverflow = function markOverflow2(obj, maxIndex) {
+  overflowChannel.set(obj, maxIndex);
+  return obj;
+};
+var isOverflow = function isOverflow2(obj) {
+  return overflowChannel.has(obj);
+};
+var getMaxIndex = function getMaxIndex2(obj) {
+  return overflowChannel.get(obj);
+};
+var setMaxIndex = function setMaxIndex2(obj, maxIndex) {
+  overflowChannel.set(obj, maxIndex);
+};
 var hexTable = function() {
   var array = [];
   for (var i = 0; i < 256; ++i) {
@@ -1484,7 +1499,7 @@ var compactQueue = function compactQueue2(queue) {
   }
 };
 var arrayToObject = function arrayToObject2(source, options) {
-  var obj = options && options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
+  var obj = options && options.plainObjects ? { __proto__: null } : {};
   for (var i = 0; i < source.length; ++i) {
     if (typeof source[i] !== "undefined") {
       obj[i] = source[i];
@@ -1496,11 +1511,15 @@ var merge = function merge2(target, source, options) {
   if (!source) {
     return target;
   }
-  if (typeof source !== "object") {
+  if (typeof source !== "object" && typeof source !== "function") {
     if (isArray$2(target)) {
       target.push(source);
     } else if (target && typeof target === "object") {
-      if (options && (options.plainObjects || options.allowPrototypes) || !has$2.call(Object.prototype, source)) {
+      if (isOverflow(target)) {
+        var newIndex = getMaxIndex(target) + 1;
+        target[newIndex] = source;
+        setMaxIndex(target, newIndex);
+      } else if (options && (options.plainObjects || options.allowPrototypes) || !has$2.call(Object.prototype, source)) {
         target[source] = true;
       }
     } else {
@@ -1509,6 +1528,15 @@ var merge = function merge2(target, source, options) {
     return target;
   }
   if (!target || typeof target !== "object") {
+    if (isOverflow(source)) {
+      var sourceKeys = Object.keys(source);
+      var result = options && options.plainObjects ? { __proto__: null, 0: target } : { 0: target };
+      for (var m = 0; m < sourceKeys.length; m++) {
+        var oldKey = parseInt(sourceKeys[m], 10);
+        result[oldKey + 1] = source[sourceKeys[m]];
+      }
+      return markOverflow(result, getMaxIndex(source) + 1);
+    }
     return [target].concat(source);
   }
   var mergeTarget = target;
@@ -1546,7 +1574,7 @@ var assign = function assignSingleSource(target, source) {
     return acc;
   }, target);
 };
-var decode = function(str, decoder, charset) {
+var decode = function(str, defaultDecoder, charset) {
   var strWithoutPlus = str.replace(/\+/g, " ");
   if (charset === "iso-8859-1") {
     return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
@@ -1557,6 +1585,7 @@ var decode = function(str, decoder, charset) {
     return strWithoutPlus;
   }
 };
+var limit = 1024;
 var encode = function encode2(str, defaultEncoder, charset, kind, format) {
   if (str.length === 0) {
     return str;
@@ -1573,27 +1602,32 @@ var encode = function encode2(str, defaultEncoder, charset, kind, format) {
     });
   }
   var out = "";
-  for (var i = 0; i < string.length; ++i) {
-    var c = string.charCodeAt(i);
-    if (c === 45 || c === 46 || c === 95 || c === 126 || c >= 48 && c <= 57 || c >= 65 && c <= 90 || c >= 97 && c <= 122 || format === formats$2.RFC1738 && (c === 40 || c === 41)) {
-      out += string.charAt(i);
-      continue;
+  for (var j = 0; j < string.length; j += limit) {
+    var segment = string.length >= limit ? string.slice(j, j + limit) : string;
+    var arr = [];
+    for (var i = 0; i < segment.length; ++i) {
+      var c = segment.charCodeAt(i);
+      if (c === 45 || c === 46 || c === 95 || c === 126 || c >= 48 && c <= 57 || c >= 65 && c <= 90 || c >= 97 && c <= 122 || format === formats$2.RFC1738 && (c === 40 || c === 41)) {
+        arr[arr.length] = segment.charAt(i);
+        continue;
+      }
+      if (c < 128) {
+        arr[arr.length] = hexTable[c];
+        continue;
+      }
+      if (c < 2048) {
+        arr[arr.length] = hexTable[192 | c >> 6] + hexTable[128 | c & 63];
+        continue;
+      }
+      if (c < 55296 || c >= 57344) {
+        arr[arr.length] = hexTable[224 | c >> 12] + hexTable[128 | c >> 6 & 63] + hexTable[128 | c & 63];
+        continue;
+      }
+      i += 1;
+      c = 65536 + ((c & 1023) << 10 | segment.charCodeAt(i) & 1023);
+      arr[arr.length] = hexTable[240 | c >> 18] + hexTable[128 | c >> 12 & 63] + hexTable[128 | c >> 6 & 63] + hexTable[128 | c & 63];
     }
-    if (c < 128) {
-      out = out + hexTable[c];
-      continue;
-    }
-    if (c < 2048) {
-      out = out + (hexTable[192 | c >> 6] + hexTable[128 | c & 63]);
-      continue;
-    }
-    if (c < 55296 || c >= 57344) {
-      out = out + (hexTable[224 | c >> 12] + hexTable[128 | c >> 6 & 63] + hexTable[128 | c & 63]);
-      continue;
-    }
-    i += 1;
-    c = 65536 + ((c & 1023) << 10 | string.charCodeAt(i) & 1023);
-    out += hexTable[240 | c >> 18] + hexTable[128 | c >> 12 & 63] + hexTable[128 | c >> 6 & 63] + hexTable[128 | c & 63];
+    out += arr.join("");
   }
   return out;
 };
@@ -1625,8 +1659,18 @@ var isBuffer = function isBuffer2(obj) {
   }
   return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
-var combine = function combine2(a, b) {
-  return [].concat(a, b);
+var combine = function combine2(a, b, arrayLimit, plainObjects) {
+  if (isOverflow(a)) {
+    var newIndex = getMaxIndex(a) + 1;
+    a[newIndex] = b;
+    setMaxIndex(a, newIndex);
+    return a;
+  }
+  var result = [].concat(a, b);
+  if (result.length > arrayLimit) {
+    return markOverflow(arrayToObject(result, { plainObjects }), result.length - 1);
+  }
+  return result;
 };
 var maybeMap = function maybeMap2(val, fn) {
   if (isArray$2(val)) {
@@ -1646,6 +1690,7 @@ var utils$2 = {
   decode,
   encode,
   isBuffer,
+  isOverflow,
   isRegExp,
   maybeMap,
   merge
@@ -1676,12 +1721,17 @@ var defaultFormat = formats$1["default"];
 var defaults$1 = {
   addQueryPrefix: false,
   allowDots: false,
+  allowEmptyArrays: false,
+  arrayFormat: "indices",
   charset: "utf-8",
   charsetSentinel: false,
+  commaRoundTrip: false,
   delimiter: "&",
   encode: true,
+  encodeDotInKeys: false,
   encoder: utils$1.encode,
   encodeValuesOnly: false,
+  filter: void 0,
   format: defaultFormat,
   formatter: formats$1.formatters[defaultFormat],
   // deprecated
@@ -1696,7 +1746,7 @@ var isNonNullishPrimitive = function isNonNullishPrimitive2(v) {
   return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
 };
 var sentinel = {};
-var stringify$1 = function stringify(object, prefix, generateArrayPrefix, commaRoundTrip, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate2, format, formatter, encodeValuesOnly, charset, sideChannel2) {
+var stringify$1 = function stringify(object, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter, sort, allowDots, serializeDate2, format, formatter, encodeValuesOnly, charset, sideChannel2) {
   var obj = object;
   var tmpSc = sideChannel2;
   var step = 0;
@@ -1756,14 +1806,19 @@ var stringify$1 = function stringify(object, prefix, generateArrayPrefix, commaR
     var keys = Object.keys(obj);
     objKeys = sort ? keys.sort(sort) : keys;
   }
-  var adjustedPrefix = commaRoundTrip && isArray$1(obj) && obj.length === 1 ? prefix + "[]" : prefix;
+  var encodedPrefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
+  var adjustedPrefix = commaRoundTrip && isArray$1(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
+  if (allowEmptyArrays && isArray$1(obj) && obj.length === 0) {
+    return adjustedPrefix + "[]";
+  }
   for (var j = 0; j < objKeys.length; ++j) {
     var key = objKeys[j];
-    var value = typeof key === "object" && typeof key.value !== "undefined" ? key.value : obj[key];
+    var value = typeof key === "object" && key && typeof key.value !== "undefined" ? key.value : obj[key];
     if (skipNulls && value === null) {
       continue;
     }
-    var keyPrefix = isArray$1(obj) ? typeof generateArrayPrefix === "function" ? generateArrayPrefix(adjustedPrefix, key) : adjustedPrefix : adjustedPrefix + (allowDots ? "." + key : "[" + key + "]");
+    var encodedKey = allowDots && encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
+    var keyPrefix = isArray$1(obj) ? typeof generateArrayPrefix === "function" ? generateArrayPrefix(adjustedPrefix, encodedKey) : adjustedPrefix : adjustedPrefix + (allowDots ? "." + encodedKey : "[" + encodedKey + "]");
     sideChannel2.set(object, step);
     var valueSideChannel = getSideChannel2();
     valueSideChannel.set(sentinel, sideChannel2);
@@ -1772,8 +1827,10 @@ var stringify$1 = function stringify(object, prefix, generateArrayPrefix, commaR
       keyPrefix,
       generateArrayPrefix,
       commaRoundTrip,
+      allowEmptyArrays,
       strictNullHandling,
       skipNulls,
+      encodeDotInKeys,
       generateArrayPrefix === "comma" && encodeValuesOnly && isArray$1(obj) ? null : encoder,
       filter,
       sort,
@@ -1791,6 +1848,12 @@ var stringify$1 = function stringify(object, prefix, generateArrayPrefix, commaR
 var normalizeStringifyOptions = function normalizeStringifyOptions2(opts) {
   if (!opts) {
     return defaults$1;
+  }
+  if (typeof opts.allowEmptyArrays !== "undefined" && typeof opts.allowEmptyArrays !== "boolean") {
+    throw new TypeError("`allowEmptyArrays` option can only be `true` or `false`, when provided");
+  }
+  if (typeof opts.encodeDotInKeys !== "undefined" && typeof opts.encodeDotInKeys !== "boolean") {
+    throw new TypeError("`encodeDotInKeys` option can only be `true` or `false`, when provided");
   }
   if (opts.encoder !== null && typeof opts.encoder !== "undefined" && typeof opts.encoder !== "function") {
     throw new TypeError("Encoder has to be a function.");
@@ -1811,13 +1874,29 @@ var normalizeStringifyOptions = function normalizeStringifyOptions2(opts) {
   if (typeof opts.filter === "function" || isArray$1(opts.filter)) {
     filter = opts.filter;
   }
+  var arrayFormat;
+  if (opts.arrayFormat in arrayPrefixGenerators) {
+    arrayFormat = opts.arrayFormat;
+  } else if ("indices" in opts) {
+    arrayFormat = opts.indices ? "indices" : "repeat";
+  } else {
+    arrayFormat = defaults$1.arrayFormat;
+  }
+  if ("commaRoundTrip" in opts && typeof opts.commaRoundTrip !== "boolean") {
+    throw new TypeError("`commaRoundTrip` must be a boolean, or absent");
+  }
+  var allowDots = typeof opts.allowDots === "undefined" ? opts.encodeDotInKeys === true ? true : defaults$1.allowDots : !!opts.allowDots;
   return {
     addQueryPrefix: typeof opts.addQueryPrefix === "boolean" ? opts.addQueryPrefix : defaults$1.addQueryPrefix,
-    allowDots: typeof opts.allowDots === "undefined" ? defaults$1.allowDots : !!opts.allowDots,
+    allowDots,
+    allowEmptyArrays: typeof opts.allowEmptyArrays === "boolean" ? !!opts.allowEmptyArrays : defaults$1.allowEmptyArrays,
+    arrayFormat,
     charset,
     charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults$1.charsetSentinel,
+    commaRoundTrip: !!opts.commaRoundTrip,
     delimiter: typeof opts.delimiter === "undefined" ? defaults$1.delimiter : opts.delimiter,
     encode: typeof opts.encode === "boolean" ? opts.encode : defaults$1.encode,
+    encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults$1.encodeDotInKeys,
     encoder: typeof opts.encoder === "function" ? opts.encoder : defaults$1.encoder,
     encodeValuesOnly: typeof opts.encodeValuesOnly === "boolean" ? opts.encodeValuesOnly : defaults$1.encodeValuesOnly,
     filter,
@@ -1845,19 +1924,8 @@ var stringify_1 = function(object, opts) {
   if (typeof obj !== "object" || obj === null) {
     return "";
   }
-  var arrayFormat;
-  if (opts && opts.arrayFormat in arrayPrefixGenerators) {
-    arrayFormat = opts.arrayFormat;
-  } else if (opts && "indices" in opts) {
-    arrayFormat = opts.indices ? "indices" : "repeat";
-  } else {
-    arrayFormat = "indices";
-  }
-  var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
-  if (opts && "commaRoundTrip" in opts && typeof opts.commaRoundTrip !== "boolean") {
-    throw new TypeError("`commaRoundTrip` must be a boolean, or absent");
-  }
-  var commaRoundTrip = generateArrayPrefix === "comma" && opts && opts.commaRoundTrip;
+  var generateArrayPrefix = arrayPrefixGenerators[options.arrayFormat];
+  var commaRoundTrip = generateArrayPrefix === "comma" && options.commaRoundTrip;
   if (!objKeys) {
     objKeys = Object.keys(obj);
   }
@@ -1867,16 +1935,19 @@ var stringify_1 = function(object, opts) {
   var sideChannel2 = getSideChannel2();
   for (var i = 0; i < objKeys.length; ++i) {
     var key = objKeys[i];
-    if (options.skipNulls && obj[key] === null) {
+    var value = obj[key];
+    if (options.skipNulls && value === null) {
       continue;
     }
     pushToArray(keys, stringify$1(
-      obj[key],
+      value,
       key,
       generateArrayPrefix,
       commaRoundTrip,
+      options.allowEmptyArrays,
       options.strictNullHandling,
       options.skipNulls,
+      options.encodeDotInKeys,
       options.encode ? options.encoder : null,
       options.filter,
       options.sort,
@@ -1905,40 +1976,55 @@ var has = Object.prototype.hasOwnProperty;
 var isArray = Array.isArray;
 var defaults = {
   allowDots: false,
+  allowEmptyArrays: false,
   allowPrototypes: false,
   allowSparse: false,
   arrayLimit: 20,
   charset: "utf-8",
   charsetSentinel: false,
   comma: false,
+  decodeDotInKeys: false,
   decoder: utils.decode,
   delimiter: "&",
   depth: 5,
+  duplicates: "combine",
   ignoreQueryPrefix: false,
   interpretNumericEntities: false,
   parameterLimit: 1e3,
   parseArrays: true,
   plainObjects: false,
-  strictNullHandling: false
+  strictDepth: false,
+  strictNullHandling: false,
+  throwOnLimitExceeded: false
 };
 var interpretNumericEntities = function(str) {
   return str.replace(/&#(\d+);/g, function($0, numberStr) {
     return String.fromCharCode(parseInt(numberStr, 10));
   });
 };
-var parseArrayValue = function(val, options) {
+var parseArrayValue = function(val, options, currentArrayLength) {
   if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
     return val.split(",");
+  }
+  if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit) {
+    throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
   }
   return val;
 };
 var isoSentinel = "utf8=%26%2310003%3B";
 var charsetSentinel = "utf8=%E2%9C%93";
 var parseValues = function parseQueryStringValues(str, options) {
-  var obj = {};
+  var obj = { __proto__: null };
   var cleanStr = options.ignoreQueryPrefix ? str.replace(/^\?/, "") : str;
-  var limit = options.parameterLimit === Infinity ? void 0 : options.parameterLimit;
-  var parts = cleanStr.split(options.delimiter, limit);
+  cleanStr = cleanStr.replace(/%5B/gi, "[").replace(/%5D/gi, "]");
+  var limit2 = options.parameterLimit === Infinity ? void 0 : options.parameterLimit;
+  var parts = cleanStr.split(
+    options.delimiter,
+    options.throwOnLimitExceeded ? limit2 + 1 : limit2
+  );
+  if (options.throwOnLimitExceeded && parts.length > limit2) {
+    throw new RangeError("Parameter limit exceeded. Only " + limit2 + " parameter" + (limit2 === 1 ? "" : "s") + " allowed.");
+  }
   var skipIndex = -1;
   var i;
   var charset = options.charset;
@@ -1962,65 +2048,100 @@ var parseValues = function parseQueryStringValues(str, options) {
     var part = parts[i];
     var bracketEqualsPos = part.indexOf("]=");
     var pos = bracketEqualsPos === -1 ? part.indexOf("=") : bracketEqualsPos + 1;
-    var key, val;
+    var key;
+    var val;
     if (pos === -1) {
       key = options.decoder(part, defaults.decoder, charset, "key");
       val = options.strictNullHandling ? null : "";
     } else {
       key = options.decoder(part.slice(0, pos), defaults.decoder, charset, "key");
-      val = utils.maybeMap(
-        parseArrayValue(part.slice(pos + 1), options),
-        function(encodedVal) {
-          return options.decoder(encodedVal, defaults.decoder, charset, "value");
-        }
-      );
+      if (key !== null) {
+        val = utils.maybeMap(
+          parseArrayValue(
+            part.slice(pos + 1),
+            options,
+            isArray(obj[key]) ? obj[key].length : 0
+          ),
+          function(encodedVal) {
+            return options.decoder(encodedVal, defaults.decoder, charset, "value");
+          }
+        );
+      }
     }
     if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
-      val = interpretNumericEntities(val);
+      val = interpretNumericEntities(String(val));
     }
     if (part.indexOf("[]=") > -1) {
       val = isArray(val) ? [val] : val;
     }
-    if (has.call(obj, key)) {
-      obj[key] = utils.combine(obj[key], val);
-    } else {
-      obj[key] = val;
+    if (key !== null) {
+      var existing = has.call(obj, key);
+      if (existing && options.duplicates === "combine") {
+        obj[key] = utils.combine(
+          obj[key],
+          val,
+          options.arrayLimit,
+          options.plainObjects
+        );
+      } else if (!existing || options.duplicates === "last") {
+        obj[key] = val;
+      }
     }
   }
   return obj;
 };
 var parseObject = function(chain, val, options, valuesParsed) {
-  var leaf = valuesParsed ? val : parseArrayValue(val, options);
+  var currentArrayLength = 0;
+  if (chain.length > 0 && chain[chain.length - 1] === "[]") {
+    var parentKey = chain.slice(0, -1).join("");
+    currentArrayLength = Array.isArray(val) && val[parentKey] ? val[parentKey].length : 0;
+  }
+  var leaf = valuesParsed ? val : parseArrayValue(val, options, currentArrayLength);
   for (var i = chain.length - 1; i >= 0; --i) {
     var obj;
     var root = chain[i];
     if (root === "[]" && options.parseArrays) {
-      obj = [].concat(leaf);
+      if (utils.isOverflow(leaf)) {
+        obj = leaf;
+      } else {
+        obj = options.allowEmptyArrays && (leaf === "" || options.strictNullHandling && leaf === null) ? [] : utils.combine(
+          [],
+          leaf,
+          options.arrayLimit,
+          options.plainObjects
+        );
+      }
     } else {
-      obj = options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
+      obj = options.plainObjects ? { __proto__: null } : {};
       var cleanRoot = root.charAt(0) === "[" && root.charAt(root.length - 1) === "]" ? root.slice(1, -1) : root;
-      var index = parseInt(cleanRoot, 10);
-      if (!options.parseArrays && cleanRoot === "") {
+      var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/g, ".") : cleanRoot;
+      var index = parseInt(decodedRoot, 10);
+      if (!options.parseArrays && decodedRoot === "") {
         obj = { 0: leaf };
-      } else if (!isNaN(index) && root !== cleanRoot && String(index) === cleanRoot && index >= 0 && (options.parseArrays && index <= options.arrayLimit)) {
+      } else if (!isNaN(index) && root !== decodedRoot && String(index) === decodedRoot && index >= 0 && (options.parseArrays && index <= options.arrayLimit)) {
         obj = [];
         obj[index] = leaf;
-      } else if (cleanRoot !== "__proto__") {
-        obj[cleanRoot] = leaf;
+      } else if (decodedRoot !== "__proto__") {
+        obj[decodedRoot] = leaf;
       }
     }
     leaf = obj;
   }
   return leaf;
 };
-var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
-  if (!givenKey) {
-    return;
-  }
+var splitKeyIntoSegments = function splitKeyIntoSegments2(givenKey, options) {
   var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
+  if (options.depth <= 0) {
+    if (!options.plainObjects && has.call(Object.prototype, key)) {
+      if (!options.allowPrototypes) {
+        return;
+      }
+    }
+    return [key];
+  }
   var brackets2 = /(\[[^[\]]*])/;
   var child = /(\[[^[\]]*])/g;
-  var segment = options.depth > 0 && brackets2.exec(key);
+  var segment = brackets2.exec(key);
   var parent = segment ? key.slice(0, segment.index) : key;
   var keys = [];
   if (parent) {
@@ -2032,9 +2153,10 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesPars
     keys.push(parent);
   }
   var i = 0;
-  while (options.depth > 0 && (segment = child.exec(key)) !== null && i < options.depth) {
+  while ((segment = child.exec(key)) !== null && i < options.depth) {
     i += 1;
-    if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
+    var segmentContent = segment[1].slice(1, -1);
+    if (!options.plainObjects && has.call(Object.prototype, segmentContent)) {
       if (!options.allowPrototypes) {
         return;
       }
@@ -2042,7 +2164,20 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesPars
     keys.push(segment[1]);
   }
   if (segment) {
+    if (options.strictDepth === true) {
+      throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
+    }
     keys.push("[" + key.slice(segment.index) + "]");
+  }
+  return keys;
+};
+var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
+  if (!givenKey) {
+    return;
+  }
+  var keys = splitKeyIntoSegments(givenKey, options);
+  if (!keys) {
+    return;
   }
   return parseObject(keys, val, options, valuesParsed);
 };
@@ -2050,40 +2185,59 @@ var normalizeParseOptions = function normalizeParseOptions2(opts) {
   if (!opts) {
     return defaults;
   }
-  if (opts.decoder !== null && opts.decoder !== void 0 && typeof opts.decoder !== "function") {
+  if (typeof opts.allowEmptyArrays !== "undefined" && typeof opts.allowEmptyArrays !== "boolean") {
+    throw new TypeError("`allowEmptyArrays` option can only be `true` or `false`, when provided");
+  }
+  if (typeof opts.decodeDotInKeys !== "undefined" && typeof opts.decodeDotInKeys !== "boolean") {
+    throw new TypeError("`decodeDotInKeys` option can only be `true` or `false`, when provided");
+  }
+  if (opts.decoder !== null && typeof opts.decoder !== "undefined" && typeof opts.decoder !== "function") {
     throw new TypeError("Decoder has to be a function.");
   }
   if (typeof opts.charset !== "undefined" && opts.charset !== "utf-8" && opts.charset !== "iso-8859-1") {
     throw new TypeError("The charset option must be either utf-8, iso-8859-1, or undefined");
   }
+  if (typeof opts.throwOnLimitExceeded !== "undefined" && typeof opts.throwOnLimitExceeded !== "boolean") {
+    throw new TypeError("`throwOnLimitExceeded` option must be a boolean");
+  }
   var charset = typeof opts.charset === "undefined" ? defaults.charset : opts.charset;
+  var duplicates = typeof opts.duplicates === "undefined" ? defaults.duplicates : opts.duplicates;
+  if (duplicates !== "combine" && duplicates !== "first" && duplicates !== "last") {
+    throw new TypeError("The duplicates option must be either combine, first, or last");
+  }
+  var allowDots = typeof opts.allowDots === "undefined" ? opts.decodeDotInKeys === true ? true : defaults.allowDots : !!opts.allowDots;
   return {
-    allowDots: typeof opts.allowDots === "undefined" ? defaults.allowDots : !!opts.allowDots,
+    allowDots,
+    allowEmptyArrays: typeof opts.allowEmptyArrays === "boolean" ? !!opts.allowEmptyArrays : defaults.allowEmptyArrays,
     allowPrototypes: typeof opts.allowPrototypes === "boolean" ? opts.allowPrototypes : defaults.allowPrototypes,
     allowSparse: typeof opts.allowSparse === "boolean" ? opts.allowSparse : defaults.allowSparse,
     arrayLimit: typeof opts.arrayLimit === "number" ? opts.arrayLimit : defaults.arrayLimit,
     charset,
     charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults.charsetSentinel,
     comma: typeof opts.comma === "boolean" ? opts.comma : defaults.comma,
+    decodeDotInKeys: typeof opts.decodeDotInKeys === "boolean" ? opts.decodeDotInKeys : defaults.decodeDotInKeys,
     decoder: typeof opts.decoder === "function" ? opts.decoder : defaults.decoder,
     delimiter: typeof opts.delimiter === "string" || utils.isRegExp(opts.delimiter) ? opts.delimiter : defaults.delimiter,
     // eslint-disable-next-line no-implicit-coercion, no-extra-parens
     depth: typeof opts.depth === "number" || opts.depth === false ? +opts.depth : defaults.depth,
+    duplicates,
     ignoreQueryPrefix: opts.ignoreQueryPrefix === true,
     interpretNumericEntities: typeof opts.interpretNumericEntities === "boolean" ? opts.interpretNumericEntities : defaults.interpretNumericEntities,
     parameterLimit: typeof opts.parameterLimit === "number" ? opts.parameterLimit : defaults.parameterLimit,
     parseArrays: opts.parseArrays !== false,
     plainObjects: typeof opts.plainObjects === "boolean" ? opts.plainObjects : defaults.plainObjects,
-    strictNullHandling: typeof opts.strictNullHandling === "boolean" ? opts.strictNullHandling : defaults.strictNullHandling
+    strictDepth: typeof opts.strictDepth === "boolean" ? !!opts.strictDepth : defaults.strictDepth,
+    strictNullHandling: typeof opts.strictNullHandling === "boolean" ? opts.strictNullHandling : defaults.strictNullHandling,
+    throwOnLimitExceeded: typeof opts.throwOnLimitExceeded === "boolean" ? opts.throwOnLimitExceeded : false
   };
 };
 var parse$1 = function(str, opts) {
   var options = normalizeParseOptions(opts);
   if (str === "" || str === null || typeof str === "undefined") {
-    return options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
+    return options.plainObjects ? { __proto__: null } : {};
   }
   var tempObj = typeof str === "string" ? parseValues(str, options) : str;
-  var obj = options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
+  var obj = options.plainObjects ? { __proto__: null } : {};
   var keys = Object.keys(tempObj);
   for (var i = 0; i < keys.length; ++i) {
     var key = keys[i];
@@ -2153,11 +2307,13 @@ const HomePage = () => {
   const page = searchParams.get("page");
   const status = searchParams.get("status");
   const q = searchParams.get("q");
+  const is_po = searchParams.get("is_po");
   const fetchApi = async () => {
     let payload = {
       page: page ?? 0,
       ...status && { status },
-      ...q && { q }
+      ...q && { q },
+      ...is_po && { is_po }
     };
     const dataParams = qs.stringify(payload, {
       arrayFormat: "repeat"
@@ -2184,7 +2340,7 @@ const HomePage = () => {
     if (page !== null) {
       fetchApi();
     }
-  }, [page, status, q]);
+  }, [page, status, q, is_po]);
   const handleSearch = (value) => {
     const newParams = new URLSearchParams(searchParams);
     if (value) {
@@ -2201,6 +2357,16 @@ const HomePage = () => {
       newParams.delete("status");
     } else {
       newParams.set("status", value);
+    }
+    newParams.set("page", "0");
+    navigate({ search: `?${newParams.toString()}` });
+  };
+  const handlePoChange = (value) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value === "all") {
+      newParams.delete("is_po");
+    } else {
+      newParams.set("is_po", value);
     }
     newParams.set("page", "0");
     navigate({ search: `?${newParams.toString()}` });
@@ -2228,10 +2394,11 @@ const HomePage = () => {
       Flex,
       {
         style: {
-          width: 350,
+          width: "100%",
+          maxWidth: 620,
           marginBottom: 24,
           marginTop: 24,
-          gap: 23,
+          gap: 16,
           position: "relative"
         },
         children: [
@@ -2245,17 +2412,17 @@ const HomePage = () => {
               onClear: () => handleSearch("")
             }
           ),
-          /* @__PURE__ */ jsxs(Flex, { style: { gap: 12 }, children: [
+          /* @__PURE__ */ jsxs(Flex, { style: { gap: 12, flexShrink: 0 }, children: [
             /* @__PURE__ */ jsx(Filter, {}),
             /* @__PURE__ */ jsxs(
               SingleSelect,
               {
-                style: { width: "100%" },
+                style: { width: "170px" },
                 value: status || "all",
                 onChange: handleStatusChange,
                 placeholder: "Filter by status",
                 children: [
-                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "all", children: "All" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "all", children: "All Status" }),
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "0", children: "Pending Payment" }),
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "1", children: "Paid" }),
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "2", children: "Shipped" }),
@@ -2263,6 +2430,20 @@ const HomePage = () => {
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "4", children: "Expired" }),
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "5", children: "Canceled by Admin" }),
                   /* @__PURE__ */ jsx(SingleSelectOption, { value: "999", children: "Need Verification" })
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxs(
+              SingleSelect,
+              {
+                style: { width: "140px" },
+                value: is_po || "all",
+                onChange: handlePoChange,
+                placeholder: "Filter by type",
+                children: [
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "all", children: "All Types" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "true", children: "Pre-Order" }),
+                  /* @__PURE__ */ jsx(SingleSelectOption, { value: "false", children: "Ready Stock" })
                 ]
               }
             )
@@ -2286,7 +2467,10 @@ const HomePage = () => {
       /* @__PURE__ */ jsx(Tbody, { children: orders && orders.length > 0 && orders.map((item, key) => /* @__PURE__ */ jsxs(Tr, { children: [
         /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.id }) }),
         /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: dayjs(item.createdAt).format("DD/MM/YYYY HH:mm") }) }),
-        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.order_id }) }),
+        /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsxs(Flex, { gap: 2, alignItems: "center", children: [
+          /* @__PURE__ */ jsx(Typography, { children: item.order_id }),
+          item.is_po && /* @__PURE__ */ jsx(Badge, { variant: "warning", size: "S", children: "PO" })
+        ] }) }),
         /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.name }) }),
         /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { children: item.email }) }),
         /* @__PURE__ */ jsx(Td, { children: /* @__PURE__ */ jsx(Typography, { style: { textTransform: "uppercase" }, children: item.shipping_service }) }),
@@ -2352,7 +2536,10 @@ function OrderItem({ data, style }) {
               flex: "1 1 0"
             },
             children: [
-              /* @__PURE__ */ jsx(Typography, { as: "h6", children: data.name }),
+              /* @__PURE__ */ jsxs(Flex, { gap: 2, alignItems: "center", children: [
+                /* @__PURE__ */ jsx(Typography, { as: "h6", children: data.name }),
+                data.is_po && /* @__PURE__ */ jsx(Badge, { variant: "warning", size: "S", children: "Pre-Order" })
+              ] }),
               data.options && data.options.length > 0 && data.options.map((item, i) => /* @__PURE__ */ jsxs(
                 Typography,
                 {
@@ -2386,7 +2573,7 @@ function OrderItem({ data, style }) {
                 money(data.regular_price),
                 " "
               ] }),
-              data.sale_price && data.regular_price != data?.sale_price && /* @__PURE__ */ jsxs(Typography, { children: [
+              data.sale_price > 0 && data?.sale_price < data.regular_price && /* @__PURE__ */ jsxs(Typography, { children: [
                 "- (",
                 money(data.sale_price),
                 ")"
@@ -2423,9 +2610,9 @@ const OrderSlug = () => {
       const citySplit = data?.city?.split("||");
       const districtSplit = data?.district?.split("||");
       const subdistrictSplit = data?.subdistrict?.split("||");
-      data.province = provinceSplit.length > 0 ? provinceSplit[0] : province.city;
-      data.city = citySplit.length > 0 ? citySplit[1] : data.city;
-      data.district = districtSplit.length > 0 ? districtSplit[1] : data.district;
+      data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : province.city;
+      data.city = citySplit && citySplit.length > 0 ? citySplit[1] : data.city;
+      data.district = districtSplit && districtSplit.length > 0 ? districtSplit[1] : data.district;
       data.subdistrict = subdistrictSplit && subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict;
       setOrder(data);
     };
@@ -2451,9 +2638,12 @@ const OrderSlug = () => {
   }, [order]);
   return /* @__PURE__ */ jsx(Page.Protect, { permissions: pluginPermissions.view, children: /* @__PURE__ */ jsx(Main, { children: /* @__PURE__ */ jsxs(Box, { padding: 8, children: [
     /* @__PURE__ */ jsxs(Flex, { style: { gap: "1rem" }, direction: "column", alignItems: "flex-start", children: [
-      /* @__PURE__ */ jsxs(Typography, { variant: "alpha", as: "h2", children: [
-        "# ",
-        order.order_id
+      /* @__PURE__ */ jsxs(Flex, { style: { gap: "0.75rem" }, alignItems: "center", children: [
+        /* @__PURE__ */ jsxs(Typography, { variant: "alpha", as: "h2", children: [
+          "# ",
+          order.order_id
+        ] }),
+        order.is_po && /* @__PURE__ */ jsx(Badge, { variant: "warning", size: "M", children: "Pre-Order" })
       ] }),
       order.createdAt && /* @__PURE__ */ jsx(Typography, { as: "h6", children: dayjs(order.createdAt).utc().format("DD/MM/YYYY HH:mm") })
     ] }),
@@ -2535,7 +2725,10 @@ const OrderSlug = () => {
                       Box,
                       {
                         style: { padding: 16 },
-                        children: /* @__PURE__ */ jsx(Status, { data: order?.order_status })
+                        children: /* @__PURE__ */ jsxs(Flex, { style: { gap: 8 }, alignItems: "center", children: [
+                          /* @__PURE__ */ jsx(Status, { data: order?.order_status }),
+                          order?.is_po && /* @__PURE__ */ jsx(Badge, { variant: "warning", children: "Pre-Order" })
+                        ] })
                       }
                     ),
                     /* @__PURE__ */ jsxs(
@@ -2585,6 +2778,18 @@ const OrderSlug = () => {
                               order.shipping_service
                             ] }),
                             /* @__PURE__ */ jsx(Typography, { children: money(order?.shipping_cost) })
+                          ] }),
+                          order?.admin_fee > 0 && /* @__PURE__ */ jsxs(Flex, { style: {
+                            width: "100%",
+                            justifyContent: "space-between",
+                            paddingTop: 8,
+                            paddingBottom: 8,
+                            paddingLeft: 16,
+                            paddingRight: 16,
+                            borderBottom: "1px solid #181826"
+                          }, children: [
+                            /* @__PURE__ */ jsx(Typography, { children: "Admin Fee" }),
+                            /* @__PURE__ */ jsx(Typography, { children: money(order?.admin_fee) })
                           ] }),
                           /* @__PURE__ */ jsxs(Flex, { style: {
                             width: "100%",
@@ -2672,12 +2877,10 @@ const OrderSlug = () => {
                                 textTransform: "uppercase"
                               },
                               children: [
-                                order.subdistrict && `, ${order.subdistrict}`,
-                                ", ",
-                                order.district,
-                                ", ",
-                                order.city,
-                                ", ",
+                                order.subdistrict && `${order.subdistrict}, `,
+                                order.district && `${order.district}, `,
+                                order.city && `${order.city}, `,
+                                " ",
                                 order.province,
                                 " - ",
                                 order.country
@@ -2847,4 +3050,3 @@ const App = () => {
 export {
   App
 };
-//# sourceMappingURL=App-BZnAGPxJ.mjs.map

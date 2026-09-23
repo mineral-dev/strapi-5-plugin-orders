@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Flex,
   IconButton,
@@ -43,6 +44,7 @@ const HomePage = () => {
   const page = searchParams.get('page');
   const status = searchParams.get('status');
   const q = searchParams.get('q');
+  const is_po = searchParams.get('is_po');
 
   const fetchApi = async () => {
 
@@ -50,6 +52,7 @@ const HomePage = () => {
       page: page ?? 0,
       ...status && { status },
       ...q && { q },
+      ...is_po && { is_po },
     }
 
     const dataParams = qs.stringify(payload, {
@@ -83,7 +86,7 @@ const HomePage = () => {
     if (page !== null) {
       fetchApi();
     }
-  }, [page, status, q]);
+  }, [page, status, q, is_po]);
 
   // Handle search input
   const handleSearch = (value) => {
@@ -105,6 +108,19 @@ const HomePage = () => {
       newParams.delete('status');
     } else {
       newParams.set('status', value);
+    }
+    newParams.set('page', '0');
+    navigate({ search: `?${newParams.toString()}` });
+  };
+
+  // Handle PO filter change
+  const handlePoChange = (value) => {
+    const newParams = new URLSearchParams(searchParams);
+
+    if (value === 'all') {
+      newParams.delete('is_po');
+    } else {
+      newParams.set('is_po', value);
     }
     newParams.set('page', '0');
     navigate({ search: `?${newParams.toString()}` });
@@ -140,10 +156,11 @@ const HomePage = () => {
           </Typography>
           <Flex
             style={{
-              width: 350,
+              width: '100%',
+              maxWidth: 620,
               marginBottom: 24,
               marginTop: 24,
-              gap: 23,
+              gap: 16,
               position: 'relative',
             }}
           >
@@ -154,15 +171,15 @@ const HomePage = () => {
               placeholder="Search orders..."
               onClear={() => handleSearch('')}
             />
-            <Flex style={{ gap: 12 }}>
+            <Flex style={{ gap: 12, flexShrink: 0 }}>
               <Filter />
               <SingleSelect
-                style={{ width: '100%' }}
+                style={{ width: '170px' }}
                 value={status || 'all'}
                 onChange={handleStatusChange}
                 placeholder="Filter by status"
               >
-                <SingleSelectOption value="all">All</SingleSelectOption>
+                <SingleSelectOption value="all">All Status</SingleSelectOption>
                 <SingleSelectOption value="0">Pending Payment</SingleSelectOption>
                 <SingleSelectOption value="1">Paid</SingleSelectOption>
                 <SingleSelectOption value="2">Shipped</SingleSelectOption>
@@ -170,6 +187,16 @@ const HomePage = () => {
                 <SingleSelectOption value="4">Expired</SingleSelectOption>
                 <SingleSelectOption value="5">Canceled by Admin</SingleSelectOption>
                 <SingleSelectOption value="999">Need Verification</SingleSelectOption>
+              </SingleSelect>
+              <SingleSelect
+                style={{ width: '140px' }}
+                value={is_po || 'all'}
+                onChange={handlePoChange}
+                placeholder="Filter by type"
+              >
+                <SingleSelectOption value="all">All Types</SingleSelectOption>
+                <SingleSelectOption value="true">Pre-Order</SingleSelectOption>
+                <SingleSelectOption value="false">Ready Stock</SingleSelectOption>
               </SingleSelect>
             </Flex>
           </Flex>
@@ -221,7 +248,12 @@ const HomePage = () => {
                       <Typography>{dayjs(item.createdAt).format("DD/MM/YYYY HH:mm")}</Typography>
                     </Td>
                     <Td>
-                      <Typography>{item.order_id}</Typography>
+                      <Flex gap={2} alignItems="center">
+                        <Typography>{item.order_id}</Typography>
+                        {item.is_po && (
+                          <Badge variant="warning" size="S">PO</Badge>
+                        )}
+                      </Flex>
                     </Td>
                     <Td>
                       <Typography>{item.name}</Typography>

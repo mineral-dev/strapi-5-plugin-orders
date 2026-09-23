@@ -1,4 +1,5 @@
 import {
+   Badge,
    Box,
    Flex,
    Main,
@@ -65,7 +66,12 @@ const OrderSlug = () => {
          <Main>
             <Box padding={8}>
                <Flex style={{ gap: '1rem' }} direction="column" alignItems="flex-start">
-                  <Typography variant="alpha" as="h2"># {order.order_id}</Typography>
+                  <Flex style={{ gap: '0.75rem' }} alignItems="center">
+                     <Typography variant="alpha" as="h2"># {order.order_id}</Typography>
+                     {order.is_po && (
+                        <Badge variant="warning" size="M">Pre-Order</Badge>
+                     )}
+                  </Flex>
                   {
                      order.createdAt &&
                      <Typography as="h6">{dayjs(order.createdAt).utc().format('DD/MM/YYYY HH:mm')}</Typography>
@@ -137,7 +143,10 @@ const OrderSlug = () => {
                         <Box
                            style={{ padding: 16, }}
                         >
-                           <Status data={order?.order_status} />
+                           <Flex style={{ gap: 8 }} alignItems="center">
+                              <Status data={order?.order_status} />
+                              {order?.is_po && <Badge variant="warning">Pre-Order</Badge>}
+                           </Flex>
                         </Box>
                         <Flex
                            style={{

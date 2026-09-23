@@ -1,4 +1,4 @@
-import { Box, Flex, Typography } from "@strapi/design-system";
+import { Badge, Box, Flex, Typography } from "@strapi/design-system";
 import React from "react";
 import money from "../utils/money";
 
@@ -27,7 +27,12 @@ export default function OrderItem({ data, style}) {
                flex: '1 1 0',
             }}
          >
-            <Typography as="h6">{data.name}</Typography>
+            <Flex gap={2} alignItems="center">
+               <Typography as="h6">{data.name}</Typography>
+               {data.is_po && (
+                  <Badge variant="warning" size="S">Pre-Order</Badge>
+               )}
+            </Flex>
             {
                (data.options && data.options.length > 0) &&
                data.options.map((item, i) => (

@@ -26,9 +26,9 @@ const controller = ({ strapi }) => ({
     ctx.body = strapi.plugin("strapi-5-plugin-orders").service("service").getWelcomeMessage();
   },
   async getOrder(ctx) {
-    const { page, status, q } = ctx.request.query;
+    const { page, status, q, is_po } = ctx.request.query;
     try {
-      ctx.body = await strapi.plugin("strapi-5-plugin-orders").service("service").getOrders({ page, status, q });
+      ctx.body = await strapi.plugin("strapi-5-plugin-orders").service("service").getOrders({ page, status, q, is_po });
     } catch (error) {
       ctx.send({ message: error.message }, 409);
     }
@@ -88,7 +88,7 @@ const service = ({ strapi }) => ({
   getWelcomeMessage() {
     return "Welcome to Strapi 🚀";
   },
-  async getOrders({ page = 0, q, status }) {
+  async getOrders({ page = 0, q, status, is_po }) {
     let orders = {
       data: [],
       pagination: {
@@ -98,6 +98,16 @@ const service = ({ strapi }) => ({
         total: 0
       }
     };
+    const andConditions = [
+      {
+        order_status: { $containsi: status ?? "" }
+      }
+    ];
+    if (is_po !== void 0 && is_po !== null && is_po !== "" && is_po !== "all") {
+      andConditions.push({
+        is_po: is_po === true || is_po === "true" || is_po === 1 || is_po === "1"
+      });
+    }
     try {
       const [entries, count] = await strapi.db.query("api::order.order").findWithCount({
         where: {
@@ -109,11 +119,7 @@ const service = ({ strapi }) => ({
               email: { $containsi: q ?? "" }
             }
           ],
-          $and: [
-            {
-              order_status: { $containsi: status ?? "" }
-            }
-          ]
+          $and: andConditions
         },
         populate: { order_item: true },
         orderBy: { id: "DESC" },
@@ -167,4 +173,3 @@ const index = {
 export {
   index as default
 };
-//# sourceMappingURL=index.mjs.map

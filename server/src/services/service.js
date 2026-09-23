@@ -2,7 +2,7 @@ const service = ({ strapi }) => ({
   getWelcomeMessage() {
     return 'Welcome to Strapi 🚀';
   },
-  async getOrders({ page = 0, q, status }) {
+  async getOrders({ page = 0, q, status, is_po }) {
     let orders = {
       data: [],
       pagination: {
@@ -11,6 +11,18 @@ const service = ({ strapi }) => ({
         pageCount: 0,
         total: 0
       }
+    }
+
+    const andConditions = [
+      {
+        order_status: { $containsi: status ?? "" }
+      }
+    ];
+
+    if (is_po !== undefined && is_po !== null && is_po !== "" && is_po !== "all") {
+      andConditions.push({
+        is_po: is_po === true || is_po === "true" || is_po === 1 || is_po === "1"
+      });
     }
 
     try {
@@ -24,11 +36,7 @@ const service = ({ strapi }) => ({
               email: { $containsi: q ?? ""}
             }
           ],
-          $and: [
-            {
-              order_status: { $containsi: status ?? "" }
-            }
-          ]
+          $and: andConditions
         },
         populate: { order_item: true },
         orderBy: { id: 'DESC' },

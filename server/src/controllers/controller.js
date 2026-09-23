@@ -7,14 +7,14 @@ const controller = ({ strapi }) => ({
       .getWelcomeMessage();
   },
   async getOrder(ctx) {
-    const { page, status, q } = ctx.request.query
+    const { page, status, q, is_po } = ctx.request.query
 
     try {
       ctx.body = await strapi
         .plugin('strapi-5-plugin-orders')
         // the name of the service file & the method.
         .service('service')
-        .getOrders({ page, status, q });
+        .getOrders({ page, status, q, is_po });
     } catch (error) {
       ctx.send({ message: error.message }, 409);
     }
