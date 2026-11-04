@@ -30,10 +30,10 @@ const OrderSlug = () => {
          const districtSplit = data?.district?.split('||')
          const subdistrictSplit = data?.subdistrict?.split('||')
 
-         data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : province.city
-         data.city = citySplit && citySplit.length > 0 ? citySplit[1] : data.city
-         data.district = districtSplit && districtSplit.length > 0 ? districtSplit[1] : data.district
-         data.subdistrict = subdistrictSplit && subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict
+         data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : (data?.province || '')
+         data.city = citySplit && citySplit.length > 1 ? citySplit[1] : (data?.city || '')
+         data.district = districtSplit && districtSplit.length > 1 ? districtSplit[1] : (data?.district || '')
+         data.subdistrict = subdistrictSplit && subdistrictSplit.length > 1 ? subdistrictSplit[1] : (data?.subdistrict || '')
          setOrder(data);
       };
       fetchApi();
@@ -117,6 +117,8 @@ const OrderSlug = () => {
                               <OrderItem
                                  data={item}
                                  key={i}
+                                 currency={order?.currency}
+                                 rate={order?.currency_rate}
                                  style={{
                                     borderBottom: order.order_item[order.order_item.length - 1] == i ? '0px' : '1px',
                                     borderColor: '#212134',
@@ -168,7 +170,7 @@ const OrderSlug = () => {
                                  paddingLeft: 16,
                                  paddingRight: 16
                               }}>{subQty()} item</Typography>
-                              <Typography>{money(subtotal())}</Typography>
+                              <Typography>{money(subtotal(), order?.currency, order?.currency_rate)}</Typography>
                            </Flex>
                            <Flex style={{
                               width: '100%',
@@ -185,7 +187,7 @@ const OrderSlug = () => {
                                  paddingLeft: 16,
                                  paddingRight: 16,
                               }}>{order?.shipping_total_weight_ori} Kg ~ {order.shipping_service}</Typography>
-                              <Typography>{money(order?.shipping_cost)}</Typography>
+                              <Typography>{money(order?.shipping_cost, order?.currency, order?.currency_rate)}</Typography>
                            </Flex>
                            {
                               order?.admin_fee > 0 &&
@@ -199,19 +201,49 @@ const OrderSlug = () => {
                                  borderBottom: '1px solid #181826'
                               }}>
                                  <Typography>Admin Fee</Typography>
-                                 <Typography>{money(order?.admin_fee)}</Typography>
+                                 <Typography>{money(order?.admin_fee, order?.currency, order?.currency_rate)}</Typography>
                               </Flex>
                            }
                            <Flex style={{
                               width: '100%',
                               justifyContent: 'space-between',
                               paddingTop: 8,
+                              paddingBottom: String(order?.currency || 'IDR').toUpperCase() === 'USD' ? 8 : 0,
                               paddingLeft: 16,
                               paddingRight: 16,
+                              borderBottom: String(order?.currency || 'IDR').toUpperCase() === 'USD' ? '1px solid #181826' : 'none'
                            }}>
                               <Typography>Total</Typography>
-                              <Typography>{money(order?.grand_total)}</Typography>
+                              <Typography>{money(order?.grand_total, order?.currency, order?.currency_rate, order?.grand_total_usd)}</Typography>
                            </Flex>
+                           {
+                              String(order?.currency || 'IDR').toUpperCase() === 'USD' && (
+                                 <>
+                                    <Flex style={{
+                                       width: '100%',
+                                       justifyContent: 'space-between',
+                                       paddingTop: 8,
+                                       paddingBottom: 8,
+                                       paddingLeft: 16,
+                                       paddingRight: 16,
+                                       borderBottom: '1px solid #181826'
+                                    }}>
+                                       <Typography>Currency Rate (1 USD)</Typography>
+                                       <Typography>{money(order?.currency_rate, 'IDR')}</Typography>
+                                    </Flex>
+                                    <Flex style={{
+                                       width: '100%',
+                                       justifyContent: 'space-between',
+                                       paddingTop: 8,
+                                       paddingLeft: 16,
+                                       paddingRight: 16,
+                                    }}>
+                                       <Typography>Total (IDR)</Typography>
+                                       <Typography>{money(order?.grand_total, 'IDR')}</Typography>
+                                    </Flex>
+                                 </>
+                              )
+                           }
                         </Flex>
                      </Box>
                   </Flex>
@@ -266,7 +298,7 @@ const OrderSlug = () => {
                                  style={{
                                     textTransform: 'uppercase'
                                  }}
-                              >{order.subdistrict && `${order.subdistrict}, `}{order.district && `${order.district}, `}{order.city && `${order.city}, `} {order.province} - {order.country}</Typography>
+                              >{[order.subdistrict, order.district, order.city, order.province].filter(Boolean).join(', ')}{order.postal_code ? ` ${order.postal_code}` : ''} - {order.country}</Typography>
                            </Flex>
                         </Flex>
                      </Box>

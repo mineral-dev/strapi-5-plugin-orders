@@ -268,7 +268,16 @@ const HomePage = () => {
                       <Typography>{item?.airwaybill_no ?? "-"}</Typography>
                     </Td>
                     <Td>
-                      <Typography>{money(item.grand_total)}</Typography>
+                      <Flex direction="column" alignItems="flex-start" gap={1}>
+                        <Typography>
+                          {money(item.grand_total, item.currency, item.currency_rate, item.grand_total_usd)}
+                        </Typography>
+                        {String(item.currency || 'IDR').toUpperCase() === 'USD' && (
+                          <Typography variant="pi" textColor="neutral600">
+                            ({money(item.grand_total, 'IDR')})
+                          </Typography>
+                        )}
+                      </Flex>
                     </Td>
                     <Td>
                       <Typography>{<Status data={item.order_status} />}</Typography>

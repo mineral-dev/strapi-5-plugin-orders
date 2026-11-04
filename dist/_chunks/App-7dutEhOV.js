@@ -10,7 +10,7 @@ const utc = require("dayjs/plugin/utc");
 const Pagination = require("rc-pagination");
 const react = require("react");
 const reactIntl = require("react-intl");
-const index = require("./index-6DOBRo7l.js");
+const index = require("./index-DY9PuxcM.js");
 const currencies = require("currency-formatter");
 const _interopDefault = (e) => e && e.__esModule ? e : { default: e };
 const dayjs__default = /* @__PURE__ */ _interopDefault(dayjs);
@@ -2290,7 +2290,23 @@ const Status = ({ data }) => {
   }, [data]);
   return /* @__PURE__ */ jsxRuntime.jsx(designSystem.Badge, { children: status.name });
 };
-const money = (data = 0) => {
+const money = (data = 0, currency = "IDR", rate = 1, usdAmount = null) => {
+  const isUsd = String(currency || "IDR").toUpperCase() === "USD";
+  if (isUsd) {
+    const numericRate = Number(rate) > 1 ? Number(rate) : 1;
+    const value = usdAmount !== null && usdAmount !== void 0 && Number(usdAmount) > 0 ? Number(usdAmount) : numericRate > 1 ? Number(data || 0) / numericRate : Number(data || 0);
+    return currencies__default.default.format(value, {
+      code: "USD",
+      symbol: "USD $",
+      // @ts-ignore
+      decimalDigits: 2,
+      decimalSeparator: ".",
+      thousandsSeparator: ",",
+      spaceBetweenAmountAndSymbol: false,
+      symbolOnLeft: true,
+      format: "%s%v"
+    });
+  }
   return currencies__default.default.format(data, {
     code: "IDR",
     symbol: "IDR",
@@ -2482,7 +2498,14 @@ const HomePage = () => {
         /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item.email }) }),
         /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { style: { textTransform: "uppercase" }, children: item.shipping_service }) }),
         /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: item?.airwaybill_no ?? "-" }) }),
-        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(item.grand_total) }) }),
+        /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { direction: "column", alignItems: "flex-start", gap: 1, children: [
+          /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(item.grand_total, item.currency, item.currency_rate, item.grand_total_usd) }),
+          String(item.currency || "IDR").toUpperCase() === "USD" && /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { variant: "pi", textColor: "neutral600", children: [
+            "(",
+            money(item.grand_total, "IDR"),
+            ")"
+          ] })
+        ] }) }),
         /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: /* @__PURE__ */ jsxRuntime.jsx(Status, { data: item.order_status }) }) }),
         /* @__PURE__ */ jsxRuntime.jsx(designSystem.Td, { style: { display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.IconButton, { onClick: () => navigate(`/plugins/${index.PLUGIN_ID}/${item.documentId}`), label: "Edit", noBorder: true, children: /* @__PURE__ */ jsxRuntime.jsx(icons.Eye, {}) }) })
       ] }, key)) })
@@ -2516,7 +2539,7 @@ const HomePage = () => {
     )
   ] }) }) });
 };
-function OrderItem({ data, style }) {
+function OrderItem({ data, style, currency = "IDR", rate = 1 }) {
   let subtotal = data.regular_price * data.qty;
   if (data?.sale_price) {
     subtotal = data.sale_price * data.qty;
@@ -2577,12 +2600,12 @@ function OrderItem({ data, style }) {
             },
             children: [
               /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { children: [
-                money(data.regular_price),
+                money(data.regular_price, currency, rate),
                 " "
               ] }),
               data.sale_price > 0 && data?.sale_price < data.regular_price && /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Typography, { children: [
                 "- (",
-                money(data.sale_price),
+                money(data.sale_price, currency, rate),
                 ")"
               ] }),
               /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: " x " }),
@@ -2597,7 +2620,7 @@ function OrderItem({ data, style }) {
               paddingLeft: 10,
               paddingRight: 10
             },
-            children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal) })
+            children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal, currency, rate) })
           }
         )
       ]
@@ -2617,10 +2640,10 @@ const OrderSlug = () => {
       const citySplit = data?.city?.split("||");
       const districtSplit = data?.district?.split("||");
       const subdistrictSplit = data?.subdistrict?.split("||");
-      data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : province.city;
-      data.city = citySplit && citySplit.length > 0 ? citySplit[1] : data.city;
-      data.district = districtSplit && districtSplit.length > 0 ? districtSplit[1] : data.district;
-      data.subdistrict = subdistrictSplit && subdistrictSplit.length > 0 ? subdistrictSplit[1] : data.subdistrict;
+      data.province = provinceSplit && provinceSplit.length > 0 ? provinceSplit[0] : data?.province || "";
+      data.city = citySplit && citySplit.length > 1 ? citySplit[1] : data?.city || "";
+      data.district = districtSplit && districtSplit.length > 1 ? districtSplit[1] : data?.district || "";
+      data.subdistrict = subdistrictSplit && subdistrictSplit.length > 1 ? subdistrictSplit[1] : data?.subdistrict || "";
       setOrder(data);
     };
     fetchApi();
@@ -2699,6 +2722,8 @@ const OrderSlug = () => {
                       OrderItem,
                       {
                         data: item,
+                        currency: order?.currency,
+                        rate: order?.currency_rate,
                         style: {
                           borderBottom: order.order_item[order.order_item.length - 1] == i ? "0px" : "1px",
                           borderColor: "#212134",
@@ -2763,7 +2788,7 @@ const OrderSlug = () => {
                               subQty(),
                               " item"
                             ] }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal()) })
+                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(subtotal(), order?.currency, order?.currency_rate) })
                           ] }),
                           /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
                             width: "100%",
@@ -2784,7 +2809,7 @@ const OrderSlug = () => {
                               " Kg ~ ",
                               order.shipping_service
                             ] }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.shipping_cost) })
+                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.shipping_cost, order?.currency, order?.currency_rate) })
                           ] }),
                           order?.admin_fee > 0 && /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
                             width: "100%",
@@ -2796,17 +2821,43 @@ const OrderSlug = () => {
                             borderBottom: "1px solid #181826"
                           }, children: [
                             /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Admin Fee" }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.admin_fee) })
+                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.admin_fee, order?.currency, order?.currency_rate) })
                           ] }),
                           /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
                             width: "100%",
                             justifyContent: "space-between",
                             paddingTop: 8,
+                            paddingBottom: String(order?.currency || "IDR").toUpperCase() === "USD" ? 8 : 0,
                             paddingLeft: 16,
-                            paddingRight: 16
+                            paddingRight: 16,
+                            borderBottom: String(order?.currency || "IDR").toUpperCase() === "USD" ? "1px solid #181826" : "none"
                           }, children: [
                             /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Total" }),
-                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.grand_total) })
+                            /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.grand_total, order?.currency, order?.currency_rate, order?.grand_total_usd) })
+                          ] }),
+                          String(order?.currency || "IDR").toUpperCase() === "USD" && /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+                            /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                              width: "100%",
+                              justifyContent: "space-between",
+                              paddingTop: 8,
+                              paddingBottom: 8,
+                              paddingLeft: 16,
+                              paddingRight: 16,
+                              borderBottom: "1px solid #181826"
+                            }, children: [
+                              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Currency Rate (1 USD)" }),
+                              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.currency_rate, "IDR") })
+                            ] }),
+                            /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Flex, { style: {
+                              width: "100%",
+                              justifyContent: "space-between",
+                              paddingTop: 8,
+                              paddingLeft: 16,
+                              paddingRight: 16
+                            }, children: [
+                              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: "Total (IDR)" }),
+                              /* @__PURE__ */ jsxRuntime.jsx(designSystem.Typography, { children: money(order?.grand_total, "IDR") })
+                            ] })
                           ] })
                         ]
                       }
@@ -2884,11 +2935,8 @@ const OrderSlug = () => {
                                 textTransform: "uppercase"
                               },
                               children: [
-                                order.subdistrict && `${order.subdistrict}, `,
-                                order.district && `${order.district}, `,
-                                order.city && `${order.city}, `,
-                                " ",
-                                order.province,
+                                [order.subdistrict, order.district, order.city, order.province].filter(Boolean).join(", "),
+                                order.postal_code ? ` ${order.postal_code}` : "",
                                 " - ",
                                 order.country
                               ]

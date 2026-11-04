@@ -2,7 +2,7 @@ import { Badge, Box, Flex, Typography } from "@strapi/design-system";
 import React from "react";
 import money from "../utils/money";
 
-export default function OrderItem({ data, style}) {
+export default function OrderItem({ data, style, currency = "IDR", rate = 1 }) {
    let subtotal = data.regular_price*data.qty
    if (data?.sale_price) {
       subtotal = data.sale_price*data.qty
@@ -52,10 +52,10 @@ export default function OrderItem({ data, style}) {
                minWidth: '25%'
             }}
          >
-            <Typography>{ money(data.regular_price) } </Typography>
+            <Typography>{ money(data.regular_price, currency, rate) } </Typography>
             {
                (data.sale_price > 0 && data?.sale_price < data.regular_price) &&
-               <Typography>- ({ money(data.sale_price) })</Typography>
+               <Typography>- ({ money(data.sale_price, currency, rate) })</Typography>
             }
             <Typography> x </Typography>
             <Typography>{data.qty}</Typography>
@@ -66,7 +66,7 @@ export default function OrderItem({ data, style}) {
                paddingRight: 10
             }}
          >
-            <Typography>{money(subtotal)}</Typography>
+            <Typography>{money(subtotal, currency, rate)}</Typography>
          </Box>
       </Flex>
    )
